@@ -9,6 +9,7 @@ use App\Http\Requests\Admin\StoreMenuItemRequest;
 use App\Http\Requests\Admin\UpdateMenuItemRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class MenuItemController extends Controller
 {
@@ -55,7 +56,7 @@ class MenuItemController extends Controller
         $validatedData = $request->validated();
 
         if ($request->hasFile('image')) {
-            $path = $request->file('image')->store('menu_items', 'public'); // Simpan di storage/app/public/menu_items
+            $path = $request->file('image')->store('menu_items', 'public');
             $validatedData['image_path'] = $path;
         }
 
@@ -63,7 +64,9 @@ class MenuItemController extends Controller
 
         MenuItem::create($validatedData);
 
-        return redirect()->route('admin.menu-items.index')->with('success', 'Item menu berhasil ditambahkan!');
+        Alert::success('Berhasil!', 'Item menu berhasil ditambahkan.');
+
+        return redirect()->route('admin.menu-items.index');
     }
 
     /**
@@ -96,7 +99,9 @@ class MenuItemController extends Controller
 
         $menuItem->update($validatedData);
 
-        return redirect()->route('admin.menu-items.index')->with('success', 'Item menu berhasil diperbarui!');
+        Alert::success('Berhasil!', 'Item menu berhasil diperbarui.');
+
+        return redirect()->route('admin.menu-items.index');
     }
 
     /**
@@ -111,6 +116,8 @@ class MenuItemController extends Controller
 
         $menuItem->delete();
 
-        return redirect()->route('admin.menu-items.index')->with('success', 'Item menu berhasil dihapus!');
+        Alert::success('Berhasil!', 'Item menu berhasil dihapus.');
+
+        return redirect()->route('admin.menu-items.index');
     }
 }

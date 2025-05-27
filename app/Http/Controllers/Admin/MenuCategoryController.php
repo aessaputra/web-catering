@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\StoreMenuCategoryRequest;
 use App\Http\Requests\Admin\UpdateMenuCategoryRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class MenuCategoryController extends Controller
 {
@@ -36,19 +37,19 @@ class MenuCategoryController extends Controller
     public function store(StoreMenuCategoryRequest $request)
     {
         $validated = $request->validated();
+        // ... (logika slug Anda) ...
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['name']);
         }
-        // Pastikan slug unik jika di-generate ulang di sini
         $count = MenuCategory::where('slug', $validated['slug'])->count();
         if ($count > 0) {
             $validated['slug'] = $validated['slug'] . '-' . ($count + 1);
         }
 
-
         MenuCategory::create($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori menu berhasil ditambahkan!');
+        Alert::success('Berhasil!', 'Kategori menu berhasil ditambahkan.');
+        return redirect()->route('admin.categories.index');
     }
 
     /**
@@ -73,27 +74,30 @@ class MenuCategoryController extends Controller
     public function update(UpdateMenuCategoryRequest $request, MenuCategory $category)
     {
         $validated = $request->validated();
-        if (empty($validated['slug'])) {
+        // ... (logika slug Anda) ...
+        if (empty($validated['slug']) && $request->filled('name')) {
+            $validated['slug'] = Str::slug($validated['name']);
+        } elseif ($category->name !== $request->name && $request->slug === $category->slug && !$request->filled('slug_manually_edited')) {
             $validated['slug'] = Str::slug($validated['name']);
         }
 
-        // Pastikan slug unik saat update, kecuali untuk diri sendiri
-        $existingSlug = MenuCategory::where('slug', $validated['slug'])->where('id', '!=', $category->id)->first();
-        if ($existingSlug) {
-            // Jika slug sudah ada dan bukan milik kategori ini, tambahkan suffix
-            $baseSlug = Str::slug($validated['name']);
-            $count = 2;
-            $newSlug = $baseSlug;
-            while (MenuCategory::where('slug', $newSlug)->where('id', '!=', $category->id)->exists()) {
-                $newSlug = $baseSlug . '-' . $count++;
+        if (isset($validated['slug'])) {
+            $existingSlug = MenuCategory::where('slug', $validated['slug'])->where('id', '!=', $category->id)->first();
+            if ($existingSlug) {
+                $baseSlug = Str::slug($request->name);
+                $count = 2;
+                $newSlug = $baseSlug;
+                while (MenuCategory::where('slug', $newSlug)->where('id', '!=', $category->id)->exists()) {
+                    $newSlug = $baseSlug . '-' . $count++;
+                }
+                $validated['slug'] = $newSlug;
             }
-            $validated['slug'] = $newSlug;
         }
-
 
         $category->update($validated);
 
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori menu berhasil diperbarui!');
+        Alert::success('Berhasil!', 'Kategori menu berhasil diperbarui.'); // Pesan SweetAlert
+        return redirect()->route('admin.categories.index');
     }
 
     /**
@@ -102,11 +106,12 @@ class MenuCategoryController extends Controller
     public function destroy(MenuCategory $category)
     {
         if ($category->menuItems()->count() > 0) {
-            return redirect()->route('admin.categories.index')
-                ->with('error', 'Kategori tidak dapat dihapus karena masih memiliki item menu. Hapus item menu terlebih dahulu atau pindahkan ke kategori lain.');
+            Alert::error('Gagal!', 'Kategori tidak dapat dihapus karena masih memiliki item menu.'); // Pesan SweetAlert
+            return redirect()->route('admin.categories.index');
         }
 
         $category->delete();
-        return redirect()->route('admin.categories.index')->with('success', 'Kategori menu berhasil dihapus!');
+        Alert::success('Berhasil!', 'Kategori menu berhasil dihapus.');
+        return redirect()->route('admin.categories.index');
     }
 }

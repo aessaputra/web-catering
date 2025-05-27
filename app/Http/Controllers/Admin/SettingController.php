@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
-use App\Http\Requests\Admin\UpdateSettingsRequest; // Import Form Request
+use App\Http\Requests\Admin\UpdateSettingsRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class SettingController extends Controller
 {
@@ -64,6 +65,8 @@ class SettingController extends Controller
         // Opsional: Bersihkan cache jika Anda men-cache settings
         // Cache::forget('site_settings'); // Sesuaikan nama cache key Anda
 
-        return redirect()->route('admin.settings.index')->with('success', 'Pengaturan berhasil diperbarui!');
+        Alert::success('Berhasil!', 'Pengaturan berhasil diperbarui.');
+
+        return redirect()->route('admin.settings.index');
     }
 }

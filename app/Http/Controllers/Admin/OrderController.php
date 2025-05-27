@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class OrderController extends Controller
 {
@@ -76,7 +77,9 @@ class OrderController extends Controller
         //     Mail::to($order->customer_email)->send(new OrderStatusUpdated($order));
         // }
 
-        return redirect()->route('admin.orders.show', $order)->with('success', 'Status pesanan berhasil diperbarui!');
+        Alert::success('Berhasil!', 'Status pesanan telah diperbarui.');
+
+        return redirect()->route('admin.orders.show', $order);
     }
 
     // Method create, store, edit, destroy tidak kita gunakan untuk Order dari sisi admin
