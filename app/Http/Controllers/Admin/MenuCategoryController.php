@@ -16,9 +16,9 @@ class MenuCategoryController extends Controller
      */
     public function index()
     {
-         $categories = MenuCategory::withCount('menuItems')
-                                    ->orderBy('name', 'asc')
-                                    ->paginate(10);
+        $categories = MenuCategory::withCount('menuItems')
+            ->orderBy('name', 'asc')
+            ->paginate(10);
         return view('admin.categories.index', compact('categories'));
     }
 
@@ -62,7 +62,7 @@ class MenuCategoryController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(MenuCategory $menuCategory)
+    public function edit(MenuCategory $category)
     {
         return view('admin.categories.edit', compact('category'));
     }
@@ -70,7 +70,7 @@ class MenuCategoryController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, MenuCategory $menuCategory)
+    public function update(UpdateMenuCategoryRequest $request, MenuCategory $category)
     {
         $validated = $request->validated();
         if (empty($validated['slug'])) {
@@ -80,7 +80,7 @@ class MenuCategoryController extends Controller
         // Pastikan slug unik saat update, kecuali untuk diri sendiri
         $existingSlug = MenuCategory::where('slug', $validated['slug'])->where('id', '!=', $category->id)->first();
         if ($existingSlug) {
-             // Jika slug sudah ada dan bukan milik kategori ini, tambahkan suffix
+            // Jika slug sudah ada dan bukan milik kategori ini, tambahkan suffix
             $baseSlug = Str::slug($validated['name']);
             $count = 2;
             $newSlug = $baseSlug;
@@ -99,11 +99,11 @@ class MenuCategoryController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(MenuCategory $menuCategory)
+    public function destroy(MenuCategory $category)
     {
         if ($category->menuItems()->count() > 0) {
             return redirect()->route('admin.categories.index')
-                             ->with('error', 'Kategori tidak dapat dihapus karena masih memiliki item menu. Hapus item menu terlebih dahulu atau pindahkan ke kategori lain.');
+                ->with('error', 'Kategori tidak dapat dihapus karena masih memiliki item menu. Hapus item menu terlebih dahulu atau pindahkan ke kategori lain.');
         }
 
         $category->delete();
