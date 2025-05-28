@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\User; // Model User
 use Illuminate\Http\Request;
+// Anda tidak perlu import Role atau Permission di sini kecuali Anda melakukan query spesifik terkait itu.
+// Pengecekan role akan dilakukan pada instance User.
 
 class CustomerController extends Controller
 {
@@ -13,10 +15,21 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::where('is_admin', false) // Hanya tampilkan pengguna yang bukan admin
-            ->orderBy('created_at', 'desc');
+        // Ubah cara filter pelanggan: tampilkan pengguna yang TIDAK memiliki role 'admin'
+        // atau yang memiliki role 'pelanggan'
+        $query = User::query();
 
-        // Fitur Pencarian (opsional)
+        // Opsi 1: Tampilkan semua user yang BUKAN admin
+        $query->whereDoesntHave('roles', function ($q) {
+            $q->where('name', 'admin');
+        });
+
+        // Opsi 2: Atau, jika Anda ingin lebih eksplisit hanya menampilkan yang memiliki role 'pelanggan'
+        // $query->role('pelanggan'); // Ini adalah scope yang disediakan oleh Spatie
+
+        $query->orderBy('created_at', 'desc');
+
+        // Fitur Pencarian (tetap sama)
         if ($request->filled('search')) {
             $searchTerm = '%' . $request->search . '%';
             $query->where(function ($q) use ($searchTerm) {
@@ -33,24 +46,21 @@ class CustomerController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(User $customer) // Menggunakan Route Model Binding, pastikan parameter di route adalah 'customer'
+    public function show(User $customer) // Route model binding tetap menggunakan User
     {
-        // Pastikan kita tidak menampilkan detail admin jika ada yang mencoba akses via URL
-        if ($customer->is_admin) {
-            // abort(404); // Atau redirect dengan pesan error
+        // Pastikan kita tidak menampilkan detail admin atau user lain yang bukan 'pelanggan'
+        // (tergantung definisi "pelanggan" Anda)
+        if ($customer->hasRole('admin')) {
+            // Atau jika Anda ingin memastikan hanya role 'pelanggan' yang ditampilkan:
+            // if (!$customer->hasRole('pelanggan')) {
             return redirect()->route('admin.customers.index')->with('error', 'Pengguna yang diminta bukan pelanggan.');
         }
 
-        // Eager load pesanan pelanggan, diurutkan dari yang terbaru
+        // Eager load pesanan pelanggan (tetap sama)
         $customer->load(['orders' => function ($query) {
             $query->orderBy('created_at', 'desc')->withCount('orderItems');
         }]);
 
         return view('admin.customers.show', compact('customer'));
     }
-
-    // Untuk manajemen pelanggan, biasanya admin tidak melakukan Create, Update, Delete data user secara langsung dari sini
-    // karena registrasi dilakukan oleh pengguna, dan update profil dilakukan oleh pengguna sendiri.
-    // Penghapusan user mungkin memerlukan pertimbangan khusus (soft delete, anonymize data pesanan, dll.)
-    // Jadi, kita hanya fokus pada index dan show sesuai definisi rute.
 }
