@@ -1,12 +1,13 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ProfileController; // Dari Breeze
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Public\HomeController;
 use App\Http\Controllers\Public\MenuController;
 use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\OrderController as PublicOrderController;
+use App\Http\Controllers\Public\UserDashboardController;
 
 /*
 |--------------------------------------------------------------------------
@@ -30,20 +31,25 @@ Route::get('/pemesanan', [PublicOrderController::class, 'create'])->name('order.
 Route::post('/pemesanan', [PublicOrderController::class, 'store'])->name('order.store');
 
 
-// Rute default dari Breeze (biarkan atau sesuaikan jika perlu)
-Route::get('/dashboard', function () {
-    // Cek jika user adalah admin, arahkan ke admin dashboard
-    if (auth()->check() && auth()->user()->is_admin) {
-        return redirect()->route('admin.dashboard');
-    }
-    // Jika bukan admin, tampilkan dashboard pelanggan
-    return view('dashboard'); // View dashboard pelanggan dari Breeze
-})->middleware(['auth', 'verified'])->name('dashboard');
+// Rute untuk Autentikasi dan Dashboard Pengguna (Breeze & Kustom)
+Route::middleware(['auth', 'verified'])->group(function () {
+    // Rute /dashboard sekarang akan ditangani oleh UserDashboardController
+    // Pengecekan is_admin untuk redirect ke admin.dashboard bisa ditangani oleh
+    // middleware AuthenticateAdmin untuk rute /admin/*, atau bisa juga
+    // ditambahkan di UserDashboardController jika ada logika khusus.
+    // Untuk sekarang, middleware 'auth' dan 'verified' sudah cukup untuk /dashboard pelanggan.
+    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+    // Rute untuk melihat detail pesanan pelanggan
+    Route::get('/dashboard/orders/{order}', [UserDashboardController::class, 'showOrder'])
+        ->name('dashboard.orders.show')
+        ->whereNumber('order'); // Memastikan {order} adalah angka (ID)
+
+    // Rute profil bawaan Breeze
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+// Memuat rute autentikasi Breeze (login, register, forgot password, dll.)
+require __DIR__ . '/auth.php';
