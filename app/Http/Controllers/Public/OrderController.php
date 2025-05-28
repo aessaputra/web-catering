@@ -11,6 +11,7 @@ use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class OrderController extends Controller
 {
@@ -37,64 +38,75 @@ class OrderController extends Controller
     {
         $validatedData = $request->validated();
 
-        DB::beginTransaction(); // Mulai transaksi database
+        DB::beginTransaction();
 
         try {
             $totalAmount = 0;
             $orderItemsData = [];
 
             foreach ($validatedData['items'] as $itemInput) {
-                if (empty($itemInput['id']) || empty($itemInput['quantity']) || $itemInput['quantity'] < 1) {
-                    continue; // Lewati item yang tidak valid atau quantity 0
+                if (empty($itemInput['id']) || !isset($itemInput['quantity']) || $itemInput['quantity'] < 1) {
+                    continue;
                 }
-
                 $menuItem = MenuItem::findOrFail($itemInput['id']);
                 $subTotal = $menuItem->price * $itemInput['quantity'];
                 $totalAmount += $subTotal;
-
                 $orderItemsData[] = [
                     'menu_item_id' => $menuItem->id,
                     'quantity'     => $itemInput['quantity'],
-                    'price'        => $menuItem->price, // Simpan harga saat pemesanan
+                    'price'        => $menuItem->price,
                     'sub_total'    => $subTotal,
                 ];
             }
 
             if (empty($orderItemsData)) {
+                DB::rollBack();
                 return back()->withInput()->with('error', 'Tidak ada item yang dipilih atau jumlah tidak valid.');
             }
 
+            $customerPhone = null; // Default ke null
+            if (Auth::check()) {
+                $customerPhone = Auth::user()->phone; // Ambil dari user yang login
+                // Jika Anda ingin user yang login bisa override phone-nya via form (misalnya formnya tidak menyembunyikan field ini),
+                // Anda bisa tambahkan:
+                // if (empty($customerPhone) && isset($validatedData['customer_phone'])) {
+                //     $customerPhone = $validatedData['customer_phone'];
+                // }
+            } else {
+                // Hanya ambil dari $validatedData jika guest dan field itu ada (seharusnya ada karena 'required' untuk guest)
+                $customerPhone = $validatedData['customer_phone'] ?? null;
+            }
+
             $order = Order::create([
-                'user_id'          => Auth::id(), // Akan null jika guest
+                'user_id'          => Auth::id(),
                 'customer_name'    => Auth::check() ? Auth::user()->name : $validatedData['customer_name'],
                 'customer_email'   => Auth::check() ? Auth::user()->email : $validatedData['customer_email'],
-                'customer_phone'   => Auth::check() ? (Auth::user()->phone ?? $validatedData['customer_phone']) : $validatedData['customer_phone'], // Asumsi ada field 'phone' di model User
+                'customer_phone'   => $customerPhone, // Gunakan variabel $customerPhone yang sudah diproses
                 'delivery_address' => $validatedData['delivery_address'],
                 'event_date'       => $validatedData['event_date'],
                 'notes'            => $validatedData['notes'] ?? null,
                 'total_amount'     => $totalAmount,
-                'status'           => 'pending', // Status awal pesanan
+                'status'           => 'pending',
             ]);
 
-            // Buat OrderItems
             foreach ($orderItemsData as $itemData) {
                 $order->orderItems()->create($itemData);
             }
 
-            DB::commit(); // Konfirmasi transaksi jika semua berjalan lancar
-
-            // Kirim notifikasi email ke pelanggan dan admin (akan diimplementasikan nanti)
-            // Mail::to($order->customer_email)->send(new OrderPlaced($order));
-            // Mail::to(config('mail.admin_address'))->send(new NewOrderNotification($order));
+            DB::commit();
 
             Log::info('Pesanan baru berhasil dibuat:', ['order_id' => $order->id, 'total' => $totalAmount]);
-
-            // Redirect ke halaman terima kasih atau detail pesanan
-            return redirect()->route('home')->with('success', 'Pesanan Anda telah berhasil dibuat! Nomor Pesanan: ' . $order->id . '. Kami akan segera menghubungi Anda.');
+            Alert::success('Berhasil!', 'Pesanan Anda telah berhasil dibuat! Nomor Pesanan: ' . $order->id . '. Kami akan segera menghubungi Anda.');
+            return redirect()->route('home');
         } catch (\Exception $e) {
-            DB::rollBack(); // Batalkan transaksi jika terjadi error
-            Log::error('Gagal membuat pesanan: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
-            return back()->withInput()->with('error', 'Terjadi kesalahan saat memproses pesanan Anda. Silakan coba lagi.');
+            DB::rollBack();
+            Log::error('Gagal membuat pesanan: ' . $e->getMessage(), ['exception' => $e]); // Ubah 'trace' menjadi 'exception' untuk logging standar
+            // Jangan tampilkan pesan error 'Terjadi kesalahan...' jika ini adalah ValidationException, biarkan Laravel yang handle
+            if ($e instanceof \Illuminate\Validation\ValidationException) {
+                throw $e;
+            }
+            Alert::error('Gagal!', 'Terjadi kesalahan saat memproses pesanan Anda. Silakan coba lagi.');
+            return back()->withInput();
         }
     }
 }

@@ -79,16 +79,35 @@
                         <x-input-error :messages="$errors->get('email')" class="mt-1" />
                     </div>
 
-                    {{-- Phone Number (Jika Anda mengaktifkannya) --}}
-                    {{-- @php
-                    $phoneInputClasses = ['block', 'w-full', 'px-4', 'py-2.5', 'border', 'rounded-lg', 'shadow-sm', 'focus:outline-none', 'focus:ring-2', 'focus:ring-orange-500', 'focus:border-orange-500', 'sm:text-sm'];
-                    if ($errors->has('phone')) { $phoneInputClasses[] = 'border-red-500'; } else { $phoneInputClasses[] = 'border-gray-300'; }
-                @endphp
-                <div class="mb-4">
-                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">{{ __('Nomor Telepon') }}</label>
-                    <input id="phone" class="{{ implode(' ', $phoneInputClasses) }}" type="tel" name="phone" value="{{ old('phone') }}" autocomplete="tel" />
-                    <x-input-error :messages="$errors->get('phone')" class="mt-1" />
-                </div> --}}
+                    {{-- Phone Number --}}
+                    @php
+                        $phoneInputClasses = [
+                            'block',
+                            'w-full',
+                            'px-4',
+                            'py-2.5',
+                            'border',
+                            'rounded-lg',
+                            'shadow-sm',
+                            'focus:outline-none',
+                            'focus:ring-2',
+                            'focus:ring-orange-500',
+                            'focus:border-orange-500',
+                            'sm:text-sm',
+                        ];
+                        if ($errors->has('phone')) {
+                            $phoneInputClasses[] = 'border-red-500';
+                        } else {
+                            $phoneInputClasses[] = 'border-gray-300';
+                        }
+                    @endphp
+                    <div class="mb-4">
+                        <label for="phone"
+                            class="block text-sm font-medium text-gray-700 mb-1">{{ __('Nomor Telepon') }}</label>
+                        <input id="phone" class="{{ implode(' ', $phoneInputClasses) }}" type="tel" name="phone"
+                            value="{{ old('phone') }}" autocomplete="tel" />
+                        <x-input-error :messages="$errors->get('phone')" class="mt-1" />
+                    </div>
 
                     {{-- Password --}}
                     @php
@@ -142,7 +161,7 @@
                             $passwordConfirmationInputClasses[] = 'border-gray-300';
                         }
                     @endphp
-                    <div class="mb-6">
+                    <div class="mb-6"> {{-- Margin bawah field terakhir sebelum blok aksi --}}
                         <label for="password_confirmation"
                             class="block text-sm font-medium text-gray-700 mb-1">{{ __('Konfirmasi Password') }}</label>
                         <input id="password_confirmation" class="{{ implode(' ', $passwordConfirmationInputClasses) }}"
@@ -150,17 +169,20 @@
                         <x-input-error :messages="$errors->get('password_confirmation')" class="mt-1" />
                     </div>
 
-                    <div class="flex items-center justify-end mb-6">
-                        <a class="underline text-sm text-gray-600 hover:text-orange-500 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500"
-                            href="{{ route('login') }}">
-                            {{ __('Sudah punya akun?') }}
-                        </a>
-                    </div>
-                    <div>
-                        <button type="submit"
-                            class="w-full ms-4 inline-flex items-center justify-center px-4 py-2.5 bg-orange-500 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-wider hover:bg-orange-600 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
-                            {{ __('Register') }}
-                        </button>
+                    {{-- Bagian Aksi: Link Login dan Tombol Register --}}
+                    <div class="mt-8"> {{-- Wrapper untuk grup aksi, mt-8 untuk jarak dari field terakhir. Anda juga bisa menggunakan mt-6 jika mb-6 pada field terakhir sudah cukup. --}}
+                        <div class="flex items-center justify-end mb-4">
+                            <a class="underline text-sm text-gray-600 hover:text-orange-500 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-orange-500"
+                                href="{{ route('login') }}">
+                                {{ __('Sudah punya akun?') }}
+                            </a>
+                        </div>
+                        <div>
+                            <button type="submit"
+                                class="w-full inline-flex items-center justify-center px-4 py-2.5 bg-orange-500 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-wider hover:bg-orange-600 active:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                {{ __('Register') }}
+                            </button>
+                        </div>
                     </div>
                 </form>
             </div>

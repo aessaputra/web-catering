@@ -1,3 +1,58 @@
+/* resources/css/app.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+* Kustomisasi SweetAlert2 untuk Tema Publik (Orange Theme)
+* Variabel ini akan menimpa default SweetAlert2 ketika app.css dimuat.
+*/
+:root {
+    --swal2-font: theme('fontFamily.sans'); /* Menggunakan font default Tailwind */
+    --swal2-background: theme('colors.white');
+    --swal2-title-color: theme('colors.gray.800');
+    --swal2-html-container-color: theme('colors.gray.600');
+    --swal2-confirm-button-background-color: theme('colors.orange.500');
+    --swal2-confirm-button-color: theme('colors.white');
+    --swal2-icon-color-success: theme('colors.green.500');
+    --swal2-success: theme('colors.green.500');
+    --swal2-icon-color-error: theme('colors.red.600');
+    --swal2-error: theme('colors.red.600');
+    --swal2-icon-color-warning: theme('colors.orange.400'); /* Bisa juga orange.500 */
+    --swal2-warning: theme('colors.orange.400');
+    --swal2-icon-color-info: theme('colors.blue.500');
+    --swal2-info: theme('colors.blue.500');
+    --swal2-icon-color-question: theme('colors.gray.400');
+    --swal2-question: theme('colors.gray.400');
+
+    /* Anda bisa menambahkan lebih banyak variabel sesuai kebutuhan.
+       Daftar variabel bisa dilihat di dokumentasi SweetAlert2 atau dengan inspect element.
+       Contoh untuk border radius tombol agar mirip Tailwind:
+       --swal2-border-radius: theme('borderRadius.lg');
+    */
+}
+
+/* Kustomisasi tambahan untuk tombol agar lebih mirip Tailwind (opsional) */
+.swal2-confirm,
+.swal2-deny,
+.swal2-cancel {
+    border-radius: theme('borderRadius.md') !important; /* Contoh: rounded-md */
+    padding: theme('spacing.2') theme('spacing.4') !important; /* Contoh: py-2 px-4 */
+    font-weight: theme('fontWeight.medium') !important;
+    box-shadow: theme('boxShadow.sm') !important;
+}
+
+.swal2-confirm:focus {
+    box-shadow: 0 0 0 3px theme('colors.orange.500 / 50%') !important;
+}
+.swal2-cancel:focus {
+    box-shadow: 0 0 0 3px theme('colors.gray.500 / 50%') !important;
+}
+.swal2-deny:focus {
+    box-shadow: 0 0 0 3px theme('colors.red.500 / 50%') !important;
+}
+
+/* Efek hover pada tombol konfirmasi publik */
+body:not(.admin-panel-body) .swal2-confirm:not([disabled]):hover {
+  background-color: theme('colors.orange.600') !important;
+}

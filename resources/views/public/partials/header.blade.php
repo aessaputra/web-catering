@@ -25,7 +25,7 @@
 
                 {{-- Tombol Pesan Sekarang --}}
                 <a href="{{ route('order.create') }}"
-                    class="inline-flex items-center justify-center min-w-[150px] {{-- Ganti 150px dengan nilai yang Anda mau, atau gunakan skala Tailwind seperti min-w-36 --}}
+                    class="inline-flex items-center justify-center min-w-[14px] {{-- Ganti 150px dengan nilai yang Anda mau, atau gunakan skala Tailwind seperti min-w-36 --}}
                             px-3 py-2 rounded-md text-sm font-medium text-white 
                             bg-orange-500 hover:bg-orange-600 
                             focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
@@ -38,7 +38,7 @@
                     @guest
                         {{-- Tombol Masuk --}}
                         <a href="{{ route('login') }}"
-                            class="inline-flex items-center justify-center min-w-[150px] {{-- Ganti 150px dengan nilai yang sama seperti Pesan Sekarang --}}
+                            class="inline-flex items-center justify-center min-w-[14px] {{-- Ganti 150px dengan nilai yang sama seperti Pesan Sekarang --}}
                                     px-3 py-2 rounded-md text-sm font-medium text-white 
                                     bg-orange-500 hover:bg-orange-600 
                                     focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 

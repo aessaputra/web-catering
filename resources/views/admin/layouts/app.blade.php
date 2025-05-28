@@ -23,6 +23,7 @@
             font-feature-settings: "cv03", "cv04", "cv11";
         }
     </style>
+
     @stack('styles')
 </head>
 

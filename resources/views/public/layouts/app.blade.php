@@ -25,6 +25,8 @@
 
         @include('public.partials.footer')
     </div>
+
+    @include('sweetalert::alert')
     @stack('scripts')
 </body>
 
