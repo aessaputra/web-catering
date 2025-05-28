@@ -16,21 +16,20 @@ class AuthenticateAdmin
      */
     public function handle(Request $request, Closure $next): Response
     {
-        // Cek apakah pengguna sudah login DAN adalah admin
         if (!Auth::check()) {
             // Jika belum login sama sekali, arahkan ke halaman login publik
             return redirect()->route('login')->with('error', 'Silakan login terlebih dahulu.');
         }
 
-        if (!Auth::user()->is_admin) {
-            // Jika sudah login TAPI bukan admin, arahkan ke halaman dashboard publik atau beranda
-            // dan berikan pesan error.
-            // Anda bisa juga logout pengguna tersebut atau tampilkan halaman 'unauthorized' (403).
-            // Auth::logout(); // Opsional: logout jika non-admin mencoba akses
+        // Ganti pengecekan is_admin dengan pengecekan role 'admin'
+        // atau permission 'akses admin panel'
+        if (!Auth::user()->hasRole('admin')) {
+            // ATAU jika Anda ingin lebih spesifik dengan permission:
+            // if (!Auth::user()->can('akses admin panel')) {
+            // Jika sudah login TAPI bukan admin/tidak punya permission, arahkan ke halaman beranda publik
             return redirect()->route('home')->with('error', 'Anda tidak memiliki hak akses ke halaman admin.');
         }
 
-        // Jika lolos semua pengecekan (sudah login dan adalah admin), lanjutkan request
         return $next($request);
     }
 }

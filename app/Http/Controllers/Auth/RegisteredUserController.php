@@ -31,20 +31,28 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:' . User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'phone' => ['nullable', 'string', 'max:20'], // Jika Anda menambahkan field phone
         ]);
 
         $user = User::create([
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
+            'phone' => $request->phone, // Jika ada
         ]);
+
+        $user->assignRole('pelanggan'); // <-- TUGASKAN ROLE 'pelanggan' SETELAH USER DIBUAT
 
         event(new Registered($user));
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        // Redirect ke dashboard yang sesuai
+        if ($user->hasRole('admin')) {
+            return redirect(RouteServiceProvider::ADMIN_HOME);
+        }
+        return redirect(RouteServiceProvider::HOME);
     }
 }

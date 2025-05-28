@@ -25,6 +25,7 @@ class DatabaseSeeder extends Seeder
             MenuCategorySeeder::class,
             MenuItemSeeder::class,
             SettingSeeder::class,
+            RolesAndPermissionsSeeder::class,
         ]);
     }
 }

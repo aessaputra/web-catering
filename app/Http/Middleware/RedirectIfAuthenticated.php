@@ -20,13 +20,15 @@ class RedirectIfAuthenticated
         $guards = empty($guards) ? [null] : $guards;
 
         foreach ($guards as $guard) {
-            if (Auth::guard($guard)->check()) {
-                // Jika pengguna yang sudah login adalah admin, arahkan ke dashboard admin
-                if (Auth::user()->is_admin) {
-                    return redirect(RouteServiceProvider::ADMIN_HOME);
+            if (Auth::guard($guard)->check()) { // Jika user sudah login
+                $user = Auth::user();
+                if ($user->hasRole('admin')) {
+                    // Jika admin, arahkan ke dashboard admin
+                    return redirect(RouteServiceProvider::ADMIN_HOME); // ADMIN_HOME biasanya '/admin/dashboard'
+                } else {
+                    // Jika pelanggan biasa, arahkan ke dashboard pelanggan
+                    return redirect(RouteServiceProvider::HOME); // HOME biasanya '/dashboard'
                 }
-                // Jika pengguna biasa, arahkan ke dashboard publik (atau halaman utama)
-                return redirect(RouteServiceProvider::HOME);
             }
         }
 

@@ -16,14 +16,17 @@ class UserDashboardController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil pesanan milik user yang sedang login, urutkan dari yang terbaru
-        // Eager load orderItems untuk menghitung jumlah item atau menampilkan detail singkat jika perlu
-        $orders = Order::where('user_id', $user->id)
-            ->withCount('orderItems') // Menghitung jumlah item per pesanan
-            ->orderBy('created_at', 'desc')
-            ->paginate(10); // Paginasi jika pesanannya banyak
+        // Jika pengguna yang login adalah admin, arahkan ke dashboard admin
+        if ($user->hasRole('admin')) {
+            return redirect()->route('admin.dashboard');
+        }
 
-        // Status pesanan untuk ditampilkan di view (sama seperti di Admin OrderController)
+        // Jika bukan admin, lanjutkan untuk menampilkan dashboard pelanggan
+        $orders = Order::where('user_id', $user->id)
+            ->withCount('orderItems')
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
+
         $orderStatuses = [
             'pending' => 'Pending',
             'processing' => 'Diproses',
@@ -32,30 +35,17 @@ class UserDashboardController extends Controller
             'cancelled' => 'Dibatalkan',
         ];
 
+        // Pastikan view 'public.dashboard.index' sudah ada
         return view('public.dashboard.index', compact('user', 'orders', 'orderStatuses'));
     }
 
-    /**
-     * Display the specified order for the customer.
-     */
     public function showOrder(Order $order)
     {
-        // Pastikan pesanan ini milik user yang sedang login
         if ($order->user_id !== Auth::id()) {
             abort(403, 'Anda tidak diizinkan melihat pesanan ini.');
         }
-
-        $order->load(['orderItems.menuItem']); // Eager load detail item
-
-        // Status pesanan
-        $orderStatuses = [
-            'pending' => 'Pending',
-            'processing' => 'Diproses',
-            'shipped' => 'Dikirim',
-            'delivered' => 'Selesai',
-            'cancelled' => 'Dibatalkan',
-        ];
-
+        $order->load(['orderItems.menuItem']);
+        $orderStatuses = [ /* ... status ... */]; // Anda bisa mendefinisikannya di sini atau mengambil dari properti class
         return view('public.dashboard.order_detail', compact('order', 'orderStatuses'));
     }
 }
