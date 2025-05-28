@@ -56,7 +56,7 @@
             <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full" :value="old('phone', $user->phone)"
                 autocomplete="tel" />
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
-            <p class="mt-1 text-xs text-gray-500">Opsional. Contoh: 081234567890</p> {{-- Tambahkan petunjuk jika perlu --}}
+            <p class="mt-1 text-xs text-gray-500"></p>
         </div>
         {{-- AKHIR BLOK NOMOR TELEPON --}}
 
