@@ -21,7 +21,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'), // Ganti dengan password yang aman
                 'email_verified_at' => now(),
                 'phone' => '081234567890', // Contoh jika ada field phone
-                // 'is_admin' => true, // DIHAPUS atau DIKOMENTARI
             ]
         );
 
@@ -32,7 +31,6 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'email_verified_at' => now(),
                 'phone' => '089876543210', // Contoh jika ada field phone
-                // 'is_admin' => false, // DIHAPUS atau DIKOMENTARI
             ]
         );
 
