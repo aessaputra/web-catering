@@ -24,7 +24,10 @@ Route::post('/pemesanan', [PublicOrderController::class, 'store'])->name('order.
 Route::middleware(['auth', 'verified'])->group(function () {
     // Rute /dashboard akan ditangani oleh UserDashboardController
     // UserDashboardController akan memiliki logika untuk redirect admin
-    Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard'); //INI PERUBAHAN PENTING
+    Route::middleware(['auth', 'verified'])->group(function () {
+        Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+        // ... rute lain yang perlu verifikasi ...
+    });
 
     Route::get('/dashboard/orders/{order}', [UserDashboardController::class, 'showOrder'])
         ->name('dashboard.orders.show')
