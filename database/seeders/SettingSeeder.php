@@ -23,6 +23,7 @@ class SettingSeeder extends Seeder
             ['key' => 'facebook_url', 'value' => 'https://facebook.com/cateringlezat'],
             // Tambahkan di dalam array $settings di SettingSeeder.php
             ['key' => 'Maps_url', 'value' => 'URL_EMBED_Maps_ANDA'],
+            ['key' => 'site_logo', 'value' => ''],
 
         ];
 

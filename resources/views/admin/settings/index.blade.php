@@ -13,16 +13,18 @@
             <h3 class="card-title">Form Pengaturan</h3>
         </div>
         <div class="card-body">
-            <form action="{{ route('admin.settings.store') }}" method="POST">
+            {{-- PENTING: Tambahkan enctype="multipart/form-data" untuk upload file --}}
+            <form action="{{ route('admin.settings.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
+
+                {{-- Field-field setting teks (Nama, Email, Deskripsi, dll.) --}}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label required" for="settings_site_name">Nama Catering/Website</label>
                             <input type="text" class="form-control @error('settings.site_name') is-invalid @enderror"
                                 name="settings[site_name]" id="settings_site_name"
-                                value="{{ old('settings.site_name', $settings['site_name'] ?? '') }}"
-                                placeholder="Contoh: Catering Lezat">
+                                value="{{ old('settings.site_name', $settings['site_name'] ?? '') }}">
                             @error('settings.site_name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -33,37 +35,30 @@
                             <label class="form-label required" for="settings_contact_email">Email Kontak Utama</label>
                             <input type="email" class="form-control @error('settings.contact_email') is-invalid @enderror"
                                 name="settings[contact_email]" id="settings_contact_email"
-                                value="{{ old('settings.contact_email', $settings['contact_email'] ?? '') }}"
-                                placeholder="Contoh: info@catering.com">
+                                value="{{ old('settings.contact_email', $settings['contact_email'] ?? '') }}">
                             @error('settings.contact_email')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
                     </div>
                 </div>
-
                 <div class="mb-3">
-                    <label class="form-label" for="settings_site_description">Deskripsi Singkat Website (untuk
-                        SEO/Footer)</label>
+                    <label class="form-label" for="settings_site_description">Deskripsi Singkat Website</label>
                     <textarea class="form-control @error('settings.site_description') is-invalid @enderror"
-                        name="settings[site_description]" id="settings_site_description" rows="3"
-                        placeholder="Deskripsi singkat tentang layanan catering Anda...">{{ old('settings.site_description', $settings['site_description'] ?? '') }}</textarea>
+                        name="settings[site_description]" id="settings_site_description" rows="3">{{ old('settings.site_description', $settings['site_description'] ?? '') }}</textarea>
                     @error('settings.site_description')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            {{-- Mengubah ini menjadi Nomor WhatsApp --}}
                             <label class="form-label required" for="settings_contact_whatsapp">Nomor WhatsApp</label>
                             <input type="text"
                                 class="form-control @error('settings.contact_whatsapp') is-invalid @enderror"
                                 name="settings[contact_whatsapp]" id="settings_contact_whatsapp"
-                                value="{{ old('settings.contact_whatsapp', $settings['contact_whatsapp'] ?? '') }}"
-                                placeholder="Contoh: 081234567890">
-                            <small class="form-hint">Misal: 081234567890 atau 6281234567890. Hanya angka.</small>
+                                value="{{ old('settings.contact_whatsapp', $settings['contact_whatsapp'] ?? '') }}">
+                            <small class="form-hint">Misal: 081234567890 atau 6281234567890.</small>
                             @error('settings.contact_whatsapp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -73,7 +68,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="settings_address">Alamat Catering</label>
                             <textarea class="form-control @error('settings.address') is-invalid @enderror" name="settings[address]"
-                                id="settings_address" rows="1" placeholder="Alamat lengkap catering Anda...">{{ old('settings.address', $settings['address'] ?? '') }}</textarea>
+                                id="settings_address" rows="1">{{ old('settings.address', $settings['address'] ?? '') }}</textarea>
                             @error('settings.address')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -81,6 +76,46 @@
                     </div>
                 </div>
 
+                <hr class="my-4"> {{-- Pemisah --}}
+
+                <h4 class="mb-3">Logo Website</h4>
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-3 md:mb-0">
+                        <label class="form-label d-block mb-2">Logo Saat Ini:</label>
+                        @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
+                            <img id="logoPreviewDisplay" src="{{ asset('storage/' . $settings['site_logo']) }}"
+                                alt="Logo Saat Ini" class="avatar avatar-xl border bg-white object-contain">
+                        @else
+                            <img id="logoPreviewDisplay" src="https://via.placeholder.com/100x100.png?text=No+Logo"
+                                alt="Tidak Ada Logo" class="avatar avatar-xl border">
+                        @endif
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="site_logo_file">Ganti/Upload Logo Baru</label>
+                            <input type="file" class="form-control @error('site_logo_file') is-invalid @enderror"
+                                name="site_logo_file" id="site_logo_file" onchange="previewLogoForAdmin(event)">
+                            <small class="form-hint">Format: JPG, PNG, GIF, SVG, WEBP. Maks 2MB.</small>
+                            @error('site_logo_file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
+                        <div class="col-md-3 align-self-end"> {{-- align-self-end agar sejajar dengan input file --}}
+                            <div class="mb-3">
+                                <label class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remove_current_logo"
+                                        value="1">
+                                    <span class="form-check-label">Hapus logo saat ini</span>
+                                </label>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <hr class="my-4">
+
+                {{-- Media Sosial & Lainnya --}}
                 <h4 class="mt-4 mb-3 border-bottom pb-2">Media Sosial & Lainnya</h4>
                 <div class="row">
                     <div class="col-md-6">
@@ -88,8 +123,7 @@
                             <label class="form-label" for="settings_instagram_url">URL Instagram</label>
                             <input type="url" class="form-control @error('settings.instagram_url') is-invalid @enderror"
                                 name="settings[instagram_url]" id="settings_instagram_url"
-                                value="{{ old('settings.instagram_url', $settings['instagram_url'] ?? '') }}"
-                                placeholder="Contoh: https://instagram.com/cateringkeren">
+                                value="{{ old('settings.instagram_url', $settings['instagram_url'] ?? '') }}">
                             @error('settings.instagram_url')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -98,10 +132,10 @@
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label" for="settings_facebook_url">URL Facebook</label>
-                            <input type="url" class="form-control @error('settings.facebook_url') is-invalid @enderror"
+                            <input type="url"
+                                class="form-control @error('settings.facebook_url') is-invalid @enderror"
                                 name="settings[facebook_url]" id="settings_facebook_url"
-                                value="{{ old('settings.facebook_url', $settings['facebook_url'] ?? '') }}"
-                                placeholder="Contoh: https://facebook.com/cateringkeren">
+                                value="{{ old('settings.facebook_url', $settings['facebook_url'] ?? '') }}">
                             @error('settings.facebook_url')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -111,19 +145,18 @@
                 <div class="mb-3">
                     <label class="form-label" for="settings_Maps_url">URL Embed Google Maps</label>
                     <textarea class="form-control @error('settings.Maps_url') is-invalid @enderror" name="settings[Maps_url]"
-                        id="settings_Maps_url" rows="3"
-                        placeholder="Masukkan HANYA URL dari atribut src iframe Google Maps. Contoh: https://www.google.com/maps/embed?pb=...">{{ old('settings.Maps_url', $settings['Maps_url'] ?? '') }}</textarea>
+                        id="settings_Maps_url" rows="3" placeholder="Masukkan HANYA URL dari atribut src iframe Google Maps...">{{ old('settings.Maps_url', $settings['Maps_url'] ?? '') }}</textarea>
                     @error('settings.Maps_url')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
 
+                {{-- Halaman Beranda --}}
                 <h4 class="mt-4 mb-3 border-bottom pb-2">Halaman Beranda</h4>
                 <div class="mb-3">
                     <label class="form-label" for="settings_homepage_promotion_message">Pesan Promosi di Beranda</label>
                     <textarea class="form-control @error('settings.homepage_promotion_message') is-invalid @enderror"
-                        name="settings[homepage_promotion_message]" id="settings_homepage_promotion_message" rows="3"
-                        placeholder="Tulis pesan promosi singkat untuk ditampilkan di halaman beranda...">{{ old('settings.homepage_promotion_message', $settings['homepage_promotion_message'] ?? '') }}</textarea>
+                        name="settings[homepage_promotion_message]" id="settings_homepage_promotion_message" rows="3">{{ old('settings.homepage_promotion_message', $settings['homepage_promotion_message'] ?? '') }}</textarea>
                     @error('settings.homepage_promotion_message')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -146,3 +179,24 @@
         </div>
     </div>
 @endsection
+
+@push('scripts')
+    <script>
+        function previewLogoForAdmin(event) {
+            const reader = new FileReader();
+            const output = document.getElementById('logoPreviewDisplay');
+            reader.onload = function() {
+                output.src = reader.result;
+            };
+            if (event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            } else {
+                @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
+                    output.src = "{{ asset('storage/' . $settings['site_logo']) }}";
+                @else
+                    output.src = "https://via.placeholder.com/100x100.png?text=No+Logo";
+                @endif
+            }
+        }
+    </script>
+@endpush

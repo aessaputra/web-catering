@@ -18,26 +18,28 @@ class UpdateSettingsRequest extends FormRequest
             'settings.site_name' => 'required|string|max:255',
             'settings.site_description' => 'nullable|string|max:1000',
             'settings.contact_email' => 'required|email|max:255',
-            // 'settings.contact_phone' => ['nullable', 'string', 'max:20', 'regex:/^[0-9\s\-\+\(\)]*$/'], // Jika masih dipakai
-            'settings.contact_whatsapp' => ['required', 'string', 'max:20', 'regex:/^[0-9]+$/'], // Hanya angka, dan required
             'settings.address' => 'nullable|string|max:500',
             'settings.instagram_url' => 'nullable|url:http,https|max:255',
             'settings.facebook_url' => 'nullable|url:http,https|max:255',
             'settings.Maps_url' => 'nullable|url:http,https|max:2048', // Validasi sebagai URL
             'settings.homepage_promotion_message' => 'nullable|string|max:500',
+            'site_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Input file
+            'remove_current_logo' => 'nullable|boolean'
         ];
     }
 
     public function messages(): array
     {
         return [
-            'settings.site_name.required' => 'Nama website wajib diisi.',
-            'settings.contact_email.required' => 'Email kontak wajib diisi.',
-            'settings.contact_email.email' => 'Format email kontak tidak valid.',
-            'settings.contact_whatsapp.required' => 'Nomor WhatsApp wajib diisi.',
+            'settings.site_name.required_with' => 'Nama website wajib diisi.',
+            'settings.contact_email.required_with' => 'Email kontak wajib diisi.',
+            'settings.contact_whatsapp.required_with' => 'Nomor WhatsApp wajib diisi.',
             'settings.contact_whatsapp.regex' => 'Nomor WhatsApp hanya boleh berisi angka.',
-            'settings.Maps_url.url' => 'Format URL untuk Peta Google tidak valid. Harap masukkan hanya URL dari atribut src.',
-            'settings.*.url' => 'Format URL tidak valid (harus diawali http:// atau https://).',
+            'settings.Maps_url.url' => 'Format URL untuk Peta Google tidak valid. Harap masukkan hanya URL dari atribut src iframe.',
+
+            'site_logo_file.image' => 'File logo harus berupa gambar.',
+            'site_logo_file.mimes' => 'Format logo yang diperbolehkan: jpeg, png, jpg, gif, svg, webp.',
+            'site_logo_file.max' => 'Ukuran logo maksimal 2MB.',
         ];
     }
 }

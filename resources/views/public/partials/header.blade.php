@@ -1,12 +1,20 @@
 <header class="bg-white shadow-md sticky top-0 z-50" x-data="{ mobileMenuOpen: false }">
     <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-        {{-- ... (Logo dan Navigasi Desktop tetap sama seperti kode Anda) ... --}}
         <nav class="flex items-center justify-between h-16">
-            {{-- Logo --}}
+            {{-- Logo dan Nama Situs --}}
             <div class="flex-shrink-0 flex items-center">
-                <a href="{{ route('home') }}" class="text-xl lg:text-2xl font-bold text-orange-600">
-                    🍰
-                    {{ app(\App\Models\Setting::class)->where('key', 'site_name')->first()?->value ?? config('app.name', 'Catering Lezat') }}
+                <a href="{{ route('home') }}" class="flex items-center text-xl lg:text-2xl font-bold text-orange-600">
+                    @if (isset($siteSettings['site_logo']) &&
+                            $siteSettings['site_logo'] &&
+                            Storage::disk('public')->exists($siteSettings['site_logo']))
+                        <img src="{{ asset('storage/' . $siteSettings['site_logo']) }}"
+                            alt="Logo {{ $siteSettings['site_name'] ?? '' }}" class="h-8 w-auto mr-2 sm:h-10">
+                    @else
+                        <span class="mr-2 text-2xl sm:text-3xl">🍰</span>
+                    @endif
+                    <span>
+                        {{ $siteSettings['site_name'] ?? 'Catering Lezat' }}
+                    </span>
                 </a>
             </div>
 
@@ -23,26 +31,26 @@
                 <a href="{{ route('contact.index') }}"
                     class="px-2 lg:px-3 py-2 rounded-md text-sm font-medium {{ request()->routeIs('contact.index') ? 'text-orange-600 border-b-2 border-orange-600' : 'text-gray-700 hover:text-orange-500' }} whitespace-nowrap">Kontak</a>
 
-                {{-- Tombol Pesan Sekarang --}}
+                {{-- Tombol Pesan Sekarang (Desktop) --}}
                 <a href="{{ route('order.create') }}"
-                    class="inline-flex items-center justify-center min-w-[14px] {{-- Ganti 150px dengan nilai yang Anda mau, atau gunakan skala Tailwind seperti min-w-36 --}}
-                            px-3 py-2 rounded-md text-sm font-medium text-white 
-                            bg-orange-500 hover:bg-orange-600 
-                            focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
-                            whitespace-nowrap">
-                    🛒 Pesan Sekarang {{-- Ikon bisa dihapus jika ingin konten teks saja --}}
+                    class="inline-flex items-center justify-center min-w-[14px] {{-- Sesuaikan nilai min-w ini --}}
+                          px-3 py-2 rounded-md text-sm font-medium text-white 
+                          bg-orange-500 hover:bg-orange-600 
+                          focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
+                          whitespace-nowrap">🛒
+                    Pesan Sekarang
                 </a>
 
                 {{-- Auth Links Desktop --}}
                 <div class="ml-2 lg:ml-4">
                     @guest
-                        {{-- Tombol Masuk --}}
+                        {{-- Tombol Masuk (Desktop) --}}
                         <a href="{{ route('login') }}"
-                            class="inline-flex items-center justify-center min-w-[14px] {{-- Ganti 150px dengan nilai yang sama seperti Pesan Sekarang --}}
-                                    px-3 py-2 rounded-md text-sm font-medium text-white 
-                                    bg-orange-500 hover:bg-orange-600 
-                                    focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
-                                    whitespace-nowrap">
+                            class="inline-flex items-center justify-center min-w-[14px] {{-- Samakan nilai min-w --}}
+                                  px-3 py-2 rounded-md text-sm font-medium text-white 
+                                  bg-orange-500 hover:bg-orange-600 
+                                  focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
+                                  whitespace-nowrap">
                             Masuk
                         </a>
                     @else
@@ -130,10 +138,10 @@
         </div>
 
         {{-- Grup untuk tombol aksi utama (Pesan Sekarang & Masuk jika guest) --}}
-        <div class="px-4 py-2 space-y-2 border-t border-gray-200"> {{-- Tambahkan border-t jika ada link di atasnya --}}
+        <div class="px-4 pb-3 pt-2 space-y-2 border-t border-gray-200">
             <a href="{{ route('order.create') }}"
                 class="block w-full px-3 py-2 rounded-md text-base font-medium text-white bg-orange-500 hover:bg-orange-600 text-center">
-                Pesan Sekarang {{-- Hapus ikon 🛒 jika ingin konsisten dengan tombol Masuk --}}
+                Pesan Sekarang {{-- Ikon 🛒 bisa dihapus jika ingin sama persis dengan tombol Masuk --}}
             </a>
             @guest
                 <a href="{{ route('login') }}"
@@ -145,7 +153,7 @@
 
         {{-- Auth Links Mobile (jika sudah login) --}}
         @auth
-            <div class="pt-4 pb-3 border-t border-gray-200">
+            <div class="pt-4 pb-3 border-t border-gray-200"> {{-- Tambahkan border-t jika sebelumnya ada tombol aksi --}}
                 <div class="px-5">
                     <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
                     <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>

@@ -20,6 +20,11 @@ Route::resource('customers', CustomerController::class)->only(['index', 'show'])
 Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
 Route::post('settings', [SettingController::class, 'store'])->name('settings.store');
 
+// Rute untuk Pesan Kontak
+Route::get('contact-messages', [SettingController::class, 'contactMessagesIndex'])->name('contact-messages.index');
+Route::get('contact-messages/{message}', [SettingController::class, 'showContactMessage'])->name('contact-messages.show')->whereNumber('message');
+Route::delete('contact-messages/{message}', [SettingController::class, 'destroyContactMessage'])->name('contact-messages.destroy')->whereNumber('message');
+
 // Contoh Rute Login Admin Khusus (jika diperlukan nanti)
 // Route::get('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'showLoginForm'])->name('login');
 // Route::post('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'login']);

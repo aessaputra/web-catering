@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Public;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Public\ContactFormRequest; // Import Form Request
+use App\Http\Requests\Public\ContactFormRequest;
 use App\Models\Setting;
+use App\Models\ContactMessage;
+use App\Mail\ContactFormAlert;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log; // Untuk logging
-use Illuminate\Support\Facades\Mail; // Jika ingin mengirim email
-// use App\Mail\ContactFormMail; // Buat Mailable jika perlu
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
+use RealRashid\SweetAlert\Facades\Alert;
 
 class ContactController extends Controller
 {
@@ -17,12 +20,15 @@ class ContactController extends Controller
      */
     public function index()
     {
-        $settings = Setting::whereIn('key', [
-            'contact_email',
-            'contact_whatsapp',
-            'address',
-            'Maps_url'
-        ])->pluck('value', 'key');
+        $settingKeys = ['contact_email', 'contact_whatsapp', 'address', 'Maps_url',];
+        $settings = Setting::whereIn('key', $settingKeys)->pluck('value', 'key')->all();
+
+        // Pastikan semua key ada, meskipun nilainya kosong, agar tidak error di view
+        foreach ($settingKeys as $key) {
+            if (!isset($settings[$key])) {
+                $settings[$key] = null;
+            }
+        }
 
         return view('public.contact', compact('settings'));
     }
@@ -32,26 +38,47 @@ class ContactController extends Controller
      */
     public function store(ContactFormRequest $request)
     {
-        // Data sudah divalidasi oleh ContactFormRequest
+        $data = $request->validated(); // Data sudah divalidasi
 
-        $data = $request->validated();
+        $adminEmail = env('ADMIN_EMAIL_ADDRESS');
+        if (empty($adminEmail)) {
+            // Fallback jika ADMIN_EMAIL_ADDRESS tidak diset di .env,
+            // Anda bisa mengambil dari settings database atau email default.
+            $adminEmailSetting = Setting::where('key', 'admin_notification_email')->first();
+            $adminEmail = $adminEmailSetting ? $adminEmailSetting->value : config('mail.from.address');
+            Log::warning('ADMIN_EMAIL_ADDRESS tidak diset di .env, menggunakan fallback: ' . $adminEmail);
+        }
 
-        // Opsi 1: Simpan ke database (buat model dan migrasi untuk 'messages' jika perlu)
-        // Message::create($data);
 
-        // Opsi 2: Kirim email ke admin
-        // Pastikan konfigurasi mail Anda sudah benar di .env
-        // try {
-        //     Mail::to(config('mail.from.address'))->send(new ContactFormMail($data));
-        // } catch (\Exception $e) {
-        //     Log::error('Gagal mengirim email kontak: ' . $e->getMessage());
-        //     // Mungkin tampilkan pesan error yang lebih umum ke pengguna
-        //     return back()->with('error', 'Terjadi kesalahan saat mengirim pesan. Silakan coba lagi nanti.');
-        // }
+        DB::beginTransaction(); // Mulai transaksi untuk jaga-jaga jika ada proses yang mungkin gagal
 
-        // Untuk saat ini, kita hanya tampilkan pesan sukses dan log data
-        Log::info('Pesan Kontak Diterima:', $data);
+        try {
+            // Opsi 2: Simpan Pesan ke Database
+            ContactMessage::create([
+                'name' => $data['name'],
+                'email' => $data['email'],
+                'message' => $data['message'],
+                'is_read' => false, // Default pesan belum dibaca
+            ]);
+            Log::info('Pesan Kontak dari ' . $data['email'] . ' berhasil disimpan ke database.');
 
-        return redirect()->route('contact.index')->with('success', 'Pesan Anda telah berhasil terkirim! Kami akan segera menghubungi Anda.');
+            // Opsi 1: Kirim Pesan ke Email Admin
+            if ($adminEmail) {
+                Mail::to($adminEmail)->send(new ContactFormAlert($data));
+                Log::info('Email notifikasi kontak untuk admin ' . $adminEmail . ' berhasil dikirim (atau diantrikan).');
+            } else {
+                Log::error('Tidak ada alamat email admin tujuan untuk notifikasi pesan kontak.');
+            }
+
+            DB::commit(); // Semua berhasil, commit transaksi
+
+            Alert::success('Pesan Terkirim!', 'Terima kasih, ' . e($data['name']) . '! Pesan Anda telah berhasil kami terima dan akan segera kami tindak lanjuti.');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Batalkan transaksi jika ada error
+            Log::error('Gagal memproses atau mengirim pesan kontak: ' . $e->getMessage(), ['exception_trace' => $e->getTraceAsString()]);
+            Alert::error('Gagal!', 'Maaf, terjadi kesalahan saat mengirim pesan Anda. Silakan coba lagi nanti atau hubungi kami langsung.');
+        }
+
+        return redirect()->route('contact.index');
     }
 }
