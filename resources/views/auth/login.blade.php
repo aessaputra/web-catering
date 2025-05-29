@@ -7,12 +7,6 @@
         <div class="max-w-md mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white shadow-xl rounded-xl p-6 sm:p-8">
                 <div class="mb-6 text-center">
-                    <a href="{{ route('home') }}" class="inline-block mb-4">
-                        <span class="text-3xl font-bold text-orange-600">
-                            🍰
-                            {{ app(\App\Models\Setting::class)->where('key', 'site_name')->first()?->value ?? config('app.name', 'Catering Lezat') }}
-                        </span>
-                    </a>
                     <h2 class="text-2xl font-semibold text-gray-800">Login Pelanggan</h2>
                 </div>
 

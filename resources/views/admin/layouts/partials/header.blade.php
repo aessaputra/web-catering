@@ -5,12 +5,23 @@
             <span class="navbar-toggler-icon"></span>
         </button>
         <h1 class="navbar-brand navbar-brand-autodark d-none-navbar-horizontal pe-0 pe-md-3">
-            <a href="{{ route('admin.dashboard') }}">
-                {{-- Ganti dengan logo Anda jika ada, atau gunakan teks --}}
-                {{-- <img src="{{ asset('admin_theme/static/logo.svg') }}" width="110" height="32" alt="Tabler" class="navbar-brand-image"> --}}
-                🍰
-                {{ app(\App\Models\Setting::class)->where('key', 'site_name')->first()?->value ?? config('app.name', 'Catering') }}
-                Admin
+            <a href="{{ route('admin.dashboard') }}" class="d-flex align-items-center">
+                @if (isset($siteSettings['site_logo']) &&
+                        !empty($siteSettings['site_logo']) &&
+                        Storage::disk('public')->exists($siteSettings['site_logo']))
+                    <img src="{{ asset('storage/' . $siteSettings['site_logo']) }}"
+                        alt="Logo {{ $siteSettings['site_name'] ?? '' }}" class="navbar-brand-image h-8 w-auto me-2">
+                    {{-- Sesuaikan tinggi (h-8) dan margin (me-2) --}}
+                @else
+                    {{-- Fallback jika tidak ada logo, bisa berupa ikon atau teks awal nama situs --}}
+                    {{-- <span class="navbar-brand-image avatar avatar-sm bg-primary-lt me-2">
+                {{ strtoupper(substr($siteSettings['site_name'] ?? 'CL', 0, 2)) }}
+            </span> --}}
+                    <span class="navbar-brand-image me-2" style="font-size: 1.5rem;">🍰</span>
+                @endif
+                <span class="d-none d-sm-block"> {{-- Nama situs hanya tampil di layar lebih besar jika terlalu panjang --}}
+                    {{ $siteSettings['site_name'] ?? config('app.name', 'Catering Lezat') }} Admin
+                </span>
             </a>
         </h1>
         <div class="navbar-nav flex-row order-md-last">
