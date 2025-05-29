@@ -16,57 +16,44 @@ class SettingController extends Controller
         'site_name',
         'site_description',
         'contact_email',
-        'contact_phone',
+        'contact_whatsapp',
         'address',
         'instagram_url',
         'facebook_url',
-        'Maps_url',
+        'Maps_url', // Key yang Anda gunakan untuk Google Maps URL
         'homepage_promotion_message',
-        // Tambahkan key lain di sini jika ada
     ];
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        // Ambil semua settings yang relevan
-        // Menggunakan pluck agar mudah diakses di view sebagai ['key' => 'value']
-        $settings = Setting::whereIn('key', $this->settingKeys)
+        $settingsFromDB = Setting::whereIn('key', $this->settingKeys)
             ->pluck('value', 'key');
 
-        // Pastikan semua key ada di collection, meskipun nilainya null
-        // agar form tetap menampilkan semua field
-        $definedSettings = [];
+        $settings = [];
         foreach ($this->settingKeys as $key) {
-            $definedSettings[$key] = $settings->get($key, ''); // Default value string kosong jika tidak ada
+            $settings[$key] = $settingsFromDB->get($key, '');
         }
 
-        return view('admin.settings.index', ['settings' => $definedSettings]);
+        return view('admin.settings.index', compact('settings'));
     }
 
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(UpdateSettingsRequest $request) // Gunakan Form Request
+    public function store(UpdateSettingsRequest $request)
     {
-        $validatedData = $request->validated()['settings'];
+        // Validated akan mengembalikan array ['settings' => [...] ]
+        $validatedSettingsInput = $request->validated()['settings'];
 
-        foreach ($validatedData as $key => $value) {
-            if (in_array($key, $this->settingKeys)) { // Hanya simpan key yang terdefinisi
+        foreach ($validatedSettingsInput as $key => $value) {
+            if (in_array($key, $this->settingKeys)) {
                 Setting::updateOrCreate(
                     ['key' => $key],
-                    ['value' => $value ?? ''] // Simpan string kosong jika value null
+                    ['value' => $value ?? '']
                 );
             }
         }
 
-        // Opsional: Bersihkan cache jika Anda men-cache settings
-        // Cache::forget('site_settings'); // Sesuaikan nama cache key Anda
+        // Cache::forget('site_settings'); // Bersihkan cache jika ada
 
         Alert::success('Berhasil!', 'Pengaturan berhasil diperbarui.');
-
         return redirect()->route('admin.settings.index');
     }
 }

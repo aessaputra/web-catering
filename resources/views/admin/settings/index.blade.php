@@ -56,12 +56,15 @@
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
-                            <label class="form-label required" for="settings_contact_phone">Nomor Telepon Kontak</label>
-                            <input type="text" class="form-control @error('settings.contact_phone') is-invalid @enderror"
-                                name="settings[contact_phone]" id="settings_contact_phone"
-                                value="{{ old('settings.contact_phone', $settings['contact_phone'] ?? '') }}"
+                            {{-- Mengubah ini menjadi Nomor WhatsApp --}}
+                            <label class="form-label required" for="settings_contact_whatsapp">Nomor WhatsApp</label>
+                            <input type="text"
+                                class="form-control @error('settings.contact_whatsapp') is-invalid @enderror"
+                                name="settings[contact_whatsapp]" id="settings_contact_whatsapp"
+                                value="{{ old('settings.contact_whatsapp', $settings['contact_whatsapp'] ?? '') }}"
                                 placeholder="Contoh: 081234567890">
-                            @error('settings.contact_phone')
+                            <small class="form-hint">Misal: 081234567890 atau 6281234567890. Hanya angka.</small>
+                            @error('settings.contact_whatsapp')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
@@ -77,7 +80,6 @@
                         </div>
                     </div>
                 </div>
-
 
                 <h4 class="mt-4 mb-3 border-bottom pb-2">Media Sosial & Lainnya</h4>
                 <div class="row">
@@ -109,7 +111,8 @@
                 <div class="mb-3">
                     <label class="form-label" for="settings_Maps_url">URL Embed Google Maps</label>
                     <textarea class="form-control @error('settings.Maps_url') is-invalid @enderror" name="settings[Maps_url]"
-                        id="settings_Maps_url" rows="3" placeholder="Masukkan kode embed iframe Google Maps atau URL direct ke peta">{{ old('settings.Maps_url', $settings['Maps_url'] ?? '') }}</textarea>
+                        id="settings_Maps_url" rows="3"
+                        placeholder="Masukkan HANYA URL dari atribut src iframe Google Maps. Contoh: https://www.google.com/maps/embed?pb=...">{{ old('settings.Maps_url', $settings['Maps_url'] ?? '') }}</textarea>
                     @error('settings.Maps_url')
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
@@ -125,7 +128,6 @@
                         <div class="invalid-feedback">{{ $message }}</div>
                     @enderror
                 </div>
-
 
                 <div class="card-footer text-end border-top pt-3 mt-3">
                     <button type="submit" class="btn btn-primary">

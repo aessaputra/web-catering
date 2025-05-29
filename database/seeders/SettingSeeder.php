@@ -17,7 +17,7 @@ class SettingSeeder extends Seeder
             ['key' => 'site_name', 'value' => 'Catering Lezat'],
             ['key' => 'site_description', 'value' => 'Solusi catering terbaik untuk segala acara Anda.'],
             ['key' => 'contact_email', 'value' => 'info@cateringlezat.com'],
-            ['key' => 'contact_phone', 'value' => '0812-3456-7890'],
+            ['key' => 'contact_whatsapp', 'value' => '0812-3456-7890'],
             ['key' => 'address', 'value' => 'Jl. Kuliner No. 1, Kota Enak, Indonesia'],
             ['key' => 'instagram_url', 'value' => 'https://instagram.com/cateringlezat'],
             ['key' => 'facebook_url', 'value' => 'https://facebook.com/cateringlezat'],

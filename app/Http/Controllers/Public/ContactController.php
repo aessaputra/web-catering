@@ -19,9 +19,9 @@ class ContactController extends Controller
     {
         $settings = Setting::whereIn('key', [
             'contact_email',
-            'contact_phone',
+            'contact_whatsapp',
             'address',
-            'Maps_url' // Tambahkan key untuk URL Google Maps jika ada
+            'Maps_url'
         ])->pluck('value', 'key');
 
         return view('public.contact', compact('settings'));
