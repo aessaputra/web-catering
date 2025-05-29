@@ -115,13 +115,61 @@
                 </div>
                 <hr class="my-4">
 
+                {{-- BAGIAN BARU UNTUK HERO IMAGE HOMEPAGE --}}
+                <h4 class="mb-3">Gambar Hero Halaman Beranda</h4>
+                <div class="row align-items-center">
+                    <div class="col-md-3 text-center mb-3 md:mb-0">
+                        <label class="form-label d-block mb-2">Gambar Hero Saat Ini:</label>
+                        <div>
+                            @if (!empty($settings['hero_image_homepage']) && Storage::disk('public')->exists($settings['hero_image_homepage']))
+                                <img id="heroImagePreviewDisplay"
+                                    src="{{ asset('storage/' . $settings['hero_image_homepage']) }}"
+                                    alt="Gambar Hero Saat Ini" class="img-fluid rounded border bg-white"
+                                    style="max-height: 150px; object-fit: contain;">
+                            @else
+                                <img id="heroImagePreviewDisplay"
+                                    src="https://via.placeholder.com/300x150.png?text=No+Hero+Image"
+                                    alt="Tidak Ada Gambar Hero" class="img-fluid rounded border">
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="hero_image_homepage_file">Ganti/Upload Gambar Hero Baru</label>
+                            <input type="file"
+                                class="form-control @error('hero_image_homepage_file') is-invalid @enderror"
+                                name="hero_image_homepage_file" id="hero_image_homepage_file"
+                                onchange="previewGenericImage(event, 'heroImagePreviewDisplay', https://via.placeholder.com/300x150.png?text=No+Hero+Image')">
+                            <small class="form-hint">Format:
+                                JPG, PNG, WEBP. Maks 3MB. Rekomendasi rasio 16:9 atau sesuai
+                                desain Anda.</small>
+                            @error('hero_image_homepage_file')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    @if (!empty($settings['hero_image_homepage']))
+                        <div class="col-md-3 align-self-end">
+                            <div class="mb-3">
+                                <label class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="remove_current_hero_image"
+                                        value="1">
+                                    <span class="form-check-label">Hapus gambar hero saat ini</span>
+                                </label>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+                <hr class="my-4">
+
                 {{-- Media Sosial & Lainnya --}}
                 <h4 class="mt-4 mb-3 border-bottom pb-2">Media Sosial & Lainnya</h4>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label" for="settings_instagram_url">URL Instagram</label>
-                            <input type="url" class="form-control @error('settings.instagram_url') is-invalid @enderror"
+                            <input type="url"
+                                class="form-control @error('settings.instagram_url') is-invalid @enderror"
                                 name="settings[instagram_url]" id="settings_instagram_url"
                                 value="{{ old('settings.instagram_url', $settings['instagram_url'] ?? '') }}">
                             @error('settings.instagram_url')
@@ -196,6 +244,20 @@
                 @else
                     output.src = "https://via.placeholder.com/100x100.png?text=No+Logo";
                 @endif
+            }
+        }
+
+        // Fungsi preview generik untuk gambar lain seperti Hero Image
+        function previewGenericImage(event, previewElementId, placeholderUrl) {
+            const reader = new FileReader();
+            const output = document.getElementById(previewElementId);
+            reader.onload = function() {
+                if (output) output.src = reader.result;
+            };
+            if (event.target.files[0]) {
+                reader.readAsDataURL(event.target.files[0]);
+            } else {
+                if (output) output.src = placeholderUrl;
             }
         }
     </script>

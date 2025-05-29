@@ -6,8 +6,6 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\View\Composers\SettingsComposer;
 use Illuminate\Support\Facades\Schema;
-// use Illuminate\Support\Facades\Schema; // Contoh: Jika Anda butuh ini nanti
-// use Illuminate\Pagination\Paginator; // Contoh: Jika Anda butuh ini nanti
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -34,17 +32,28 @@ class AppServiceProvider extends ServiceProvider
                 'public.layouts.app',                 // Layout publik utama
                 'public.partials.header',             // Header publik
                 'public.partials.footer',             // Footer publik
-                'admin.layouts.app',                  // Layout admin utama (untuk nama situs di title/header admin)
+                'public.home',                        // Halaman beranda publik
+                // Tambahkan view lain yang membutuhkan $siteSettings,
+                // seperti halaman kontak, menu, about jika mereka menampilkan nama situs/logo dari settings
+                'public.contact',
+                'public.menu_list', // Ganti dengan nama view daftar menu Anda jika berbeda
+                'public.about',
+                'public.order_form',
+
+                'admin.layouts.app',                  // Layout admin utama
                 'admin.layouts.partials.header',      // Header admin
                 'admin.layouts.partials.footer',      // Footer admin
-                'auth.*',                             // Semua view autentikasi (login, register, dll.)
+
+                'auth.*',                             // Semua view autentikasi
                 'public.dashboard.index',             // Dashboard pelanggan
                 'public.dashboard.order_detail',      // Detail pesanan pelanggan
-                'emails.contact.form-message',        // Template email kontak ke admin
+
+                'emails.contact.form-message',        // Template email kontak kustom Anda
                 'vendor.notifications.email',         // Template email notifikasi default Laravel
                 'vendor.mail.html.header',            // Komponen header email
                 'vendor.mail.html.footer',            // Komponen footer email
-                // Tambahkan view lain yang membutuhkan $siteSettings
+                'app.Notifications.CustomVerifyEmailNotification',
+                'app.Notifications.CustomResetPasswordNotification'
             ],
             SettingsComposer::class
         );

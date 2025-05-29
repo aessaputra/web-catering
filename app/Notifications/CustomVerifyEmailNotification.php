@@ -8,6 +8,7 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
 use Illuminate\Support\Facades\URL;
+use App\Models\Setting;
 
 class CustomVerifyEmailNotification extends Notification
 {
@@ -37,13 +38,16 @@ class CustomVerifyEmailNotification extends Notification
     public function toMail(object $notifiable): MailMessage
     {
         $verificationUrl = $this->verificationUrl($notifiable);
-        $appName = config('app.name');
+
+        // Ambil nama situs dari database settings
+        $siteNameSetting = Setting::where('key', 'site_name')->first();
+        $appName = $siteNameSetting ? $siteNameSetting->value : config('app.name', 'Catering Lezat');
 
         return (new MailMessage)
-            ->subject(Lang::get('Verifikasi Alamat Email untuk ') . $appName)
-            ->line(Lang::get('Silakan klik tombol di bawah ini untuk memverifikasi alamat email Anda.'))
+            ->subject(Lang::get('Verifikasi Alamat Email Anda') . ' - ' . $appName)
+            ->line(Lang::get('Terima kasih telah mendaftar di :app_name! Mohon klik tombol di bawah ini untuk memverifikasi alamat email Anda.', ['app_name' => $appName]))
             ->action(Lang::get('Verifikasi Alamat Email'), $verificationUrl)
-            ->line(Lang::get('Jika Anda tidak membuat akun ini, Anda dapat mengabaikan email ini.'));
+            ->line(Lang::get('Jika Anda merasa tidak pernah membuat akun ini, Anda dapat mengabaikan email ini.'));
     }
 
     /**

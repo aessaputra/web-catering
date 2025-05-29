@@ -24,9 +24,10 @@ class SettingController extends Controller
         'address',
         'instagram_url',
         'facebook_url',
-        'Maps_url', // Key yang Anda gunakan untuk Google Maps URL
+        'Maps_url',
         'homepage_promotion_message',
-        'site_logo'
+        'site_logo',
+        'hero_image_homepage'
     ];
 
     public function index()
@@ -75,6 +76,24 @@ class SettingController extends Controller
                     ['key' => 'site_logo'],
                     ['value' => ''] // Set path logo menjadi kosong
                 );
+            }
+
+            // Handle File Upload untuk Hero Image Homepage
+            if ($request->hasFile('hero_image_homepage_file')) {
+                $oldHeroImagePath = Setting::where('key', 'hero_image_homepage')->first()?->value;
+                if ($oldHeroImagePath && Storage::disk('public')->exists($oldHeroImagePath)) {
+                    Storage::disk('public')->delete($oldHeroImagePath);
+                }
+                $file = $request->file('hero_image_homepage_file');
+                $fileName = 'hero_home_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('settings', $fileName, 'public');
+                Setting::updateOrCreate(['key' => 'hero_image_homepage'], ['value' => $path]);
+            } elseif ($request->boolean('remove_current_hero_image')) {
+                $oldHeroImagePath = Setting::where('key', 'hero_image_homepage')->first()?->value;
+                if ($oldHeroImagePath && Storage::disk('public')->exists($oldHeroImagePath)) {
+                    Storage::disk('public')->delete($oldHeroImagePath);
+                }
+                Setting::updateOrCreate(['key' => 'hero_image_homepage'], ['value' => '']);
             }
 
             // Simpan settings teks lainnya

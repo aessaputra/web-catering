@@ -21,9 +21,9 @@ class SettingSeeder extends Seeder
             ['key' => 'address', 'value' => 'Jl. Kuliner No. 1, Kota Enak, Indonesia'],
             ['key' => 'instagram_url', 'value' => 'https://instagram.com/cateringlezat'],
             ['key' => 'facebook_url', 'value' => 'https://facebook.com/cateringlezat'],
-            // Tambahkan di dalam array $settings di SettingSeeder.php
             ['key' => 'Maps_url', 'value' => 'URL_EMBED_Maps_ANDA'],
             ['key' => 'site_logo', 'value' => ''],
+            ['key' => 'hero_image_homepage', 'value' => ''],
 
         ];
 

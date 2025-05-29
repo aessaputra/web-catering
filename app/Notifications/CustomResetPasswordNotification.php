@@ -7,6 +7,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Lang;
+use App\Models\Setting;
 
 class CustomResetPasswordNotification extends Notification implements ShouldQueue
 {
@@ -38,8 +39,9 @@ class CustomResetPasswordNotification extends Notification implements ShouldQueu
      */
     public function toMail(object $notifiable): MailMessage
     {
-        $appName = config('app.name');
-        // Membuat URL reset password
+        $siteNameSetting = Setting::where('key', 'site_name')->first();
+        $appName = $siteNameSetting ? $siteNameSetting->value : config('app.name', 'Catering Lezat');
+
         $resetUrl = url(route('password.reset', [
             'token' => $this->token,
             'email' => $notifiable->getEmailForPasswordReset(),

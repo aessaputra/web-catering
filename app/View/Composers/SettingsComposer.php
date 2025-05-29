@@ -23,7 +23,8 @@ class SettingsComposer
     'facebook_url',
     'Maps_url',
     'homepage_promotion_message',
-    'site_logo'
+    'site_logo',
+    'hero_image_homepage',
   ];
 
   /**
@@ -68,8 +69,9 @@ class SettingsComposer
   private function getDefaultSettingValue(string $key): ?string
   {
     $defaults = [
-      'site_name' => config('app.name', 'Catering Lezat'), // Mengambil dari config/app.php
-      'site_logo' => null, // atau path ke logo default jika ada, misal 'images/default-logo.png'
+      'site_name' => config('app.name', 'Catering Lezat'),
+      'site_logo' => null,
+      'hero_image_homepage' => null,
       'site_description' => 'Deskripsi default website catering Anda.',
       'contact_email' => 'email@default.com',
       'contact_whatsapp' => '000000000000',
