@@ -121,7 +121,7 @@
                             <label for="new_status" class="form-label">Ubah Status Ke:</label>
                             <select name="status" id="new_status"
                                 class="form-select @error('status') is-invalid @enderror">
-                                @foreach ($statuses as $statusCode => $statusLabel)
+                                @foreach ($orderStatuses as $statusCode => $statusLabel)
                                     <option value="{{ $statusCode }}"
                                         {{ $order->status == $statusCode ? 'selected' : '' }}>
                                         {{ $statusLabel }}
