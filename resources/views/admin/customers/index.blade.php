@@ -58,8 +58,8 @@
                         <th>Email</th>
                         <th>No. Telepon</th>
                         <th>Terdaftar</th>
-                        <th class="text-center">Total Pesanan</th>
-                        <th class="text-end">Aksi</th> {{-- Rata kanan untuk kolom aksi --}}
+                        <th>Total Pesanan</th>
+                        <th>Aksi</th> {{-- Rata kanan untuk kolom aksi --}}
                     </tr>
                 </thead>
                 <tbody>
