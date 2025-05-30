@@ -72,7 +72,7 @@
             </table>
         </div>
         <div class="card-footer d-flex align-items-center">
-            {{ $customers->links() }}
+            {{ $customers->links('vendor.pagination.bootstrap-5') }}
         </div>
     </div>
 @endsection
