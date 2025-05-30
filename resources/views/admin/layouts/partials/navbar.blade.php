@@ -3,6 +3,7 @@
         <div class="navbar">
             <div class="container-xl">
                 <ul class="navbar-nav">
+                    {{-- Dashboard --}}
                     <li class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.dashboard') }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -20,11 +21,13 @@
                             </span>
                         </a>
                     </li>
+
+                    {{-- Manajemen Menu Dropdown --}}
                     <li
-                        class="nav-item dropdown {{ Str::startsWith(request()->route()->getName(), 'admin.categories') || Str::startsWith(request()->route()->getName(), 'admin.menu-items') ? 'active' : '' }}">
+                        class="nav-item dropdown {{ Str::startsWith(request()->route()->getName(), ['admin.categories', 'admin.menu-items']) ? 'active' : '' }}">
                         <a class="nav-link dropdown-toggle" href="#navbar-menu-management" data-bs-toggle="dropdown"
-                            data-bs-auto-close="outside" role="button"
-                            aria-expanded="{{ Str::startsWith(request()->route()->getName(), 'admin.categories') || Str::startsWith(request()->route()->getName(), 'admin.menu-items') ? 'true' : 'false' }}">
+                            data-bs-auto-close="true" role="button"
+                            aria-expanded="{{ Str::startsWith(request()->route()->getName(), ['admin.categories', 'admin.menu-items']) ? 'true' : 'false' }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <svg xmlns="http://www.w3.org/2000/svg"
                                     class="icon icon-tabler icon-tabler-tools-kitchen-2" width="24" height="24"
@@ -44,17 +47,19 @@
                                 Manajemen Menu
                             </span>
                         </a>
-                        <div class="dropdown-menu">
-                            <a class="dropdown-item {{ request()->routeIs('admin.categories.index') ? 'active' : '' }}"
+                        <div class="dropdown-menu"> {{-- Tidak ada kelas 'show' dinamis di sini --}}
+                            <a class="dropdown-item {{ request()->routeIs('admin.categories.*') ? 'active' : '' }}"
                                 href="{{ route('admin.categories.index') }}">
                                 Kategori Menu
                             </a>
-                            <a class="dropdown-item {{ request()->routeIs('admin.menu-items.index') ? 'active' : '' }}"
+                            <a class="dropdown-item {{ request()->routeIs('admin.menu-items.*') ? 'active' : '' }}"
                                 href="{{ route('admin.menu-items.index') }}">
                                 Item Menu
                             </a>
                         </div>
                     </li>
+
+                    {{-- Manajemen Pesanan --}}
                     <li class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.orders.index') }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -74,6 +79,8 @@
                             </span>
                         </a>
                     </li>
+
+                    {{-- Manajemen Pelanggan --}}
                     <li class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.customers.index') }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -93,6 +100,7 @@
                         </a>
                     </li>
 
+                    {{-- Arsip Pesan Kontak --}}
                     <li class="nav-item {{ request()->routeIs('admin.contact-messages.*') ? 'active' : '' }}">
                         <a class="nav-link" href="{{ route('admin.contact-messages.index') }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
@@ -112,34 +120,65 @@
                         </a>
                     </li>
 
-                    <li class="nav-item {{ request()->routeIs('admin.settings.index') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.settings.index') }}">
+                    {{-- Dropdown Pengaturan --}}
+                    <li
+                        class="nav-item dropdown {{ request()->routeIs('admin.settings.general.index') || request()->routeIs('admin.settings.about.index')
+                            ? 'active'
+                            : '' }}">
+                        <a class="nav-link dropdown-toggle" href="#navbar-settings-dropdown"
+                            data-bs-toggle="dropdown" data-bs-auto-close="true" {{-- Memastikan dropdown menutup saat item diklik --}} role="button"
+                            aria-expanded="{{ request()->routeIs('admin.settings.general.index') || request()->routeIs('admin.settings.about.index')
+                                ? 'true'
+                                : 'false' }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-settings"
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="icon icon-tabler icon-tabler-adjustments-horizontal" width="24"
+                                    height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M14 6m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M4 6l8 0" />
+                                    <path d="M16 6l4 0" />
+                                    <path d="M8 12m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M4 12l2 0" />
+                                    <path d="M10 12l10 0" />
+                                    <path d="M17 18m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
+                                    <path d="M4 18l11 0" />
+                                    <path d="M19 18l1 0" />
+                                </svg>
+                            </span>
+                            <span class="nav-link-title">
+                                Pengaturan Situs
+                            </span>
+                        </a>
+                        <div class="dropdown-menu"> {{-- Tidak ada kondisi kelas 'show' di sini --}}
+                            <a class="dropdown-item {{ request()->routeIs('admin.settings.general.index') ? 'active' : '' }}"
+                                href="{{ route('admin.settings.general.index') }}"> {{-- Tidak perlu hash jika halaman terpisah --}}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-tool me-2"
                                     width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
                                     stroke="currentColor" fill="none" stroke-linecap="round"
                                     stroke-linejoin="round">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                                    <path
-                                        d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z" />
-                                    <path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0" />
+                                    <path d="M7 10h3v-3l-3.5 -3.5a6 6 0 0 1 8 8l-3.5 -3.5v-3h-3" />
                                 </svg>
-                            </span>
-                            <span class="nav-link-title">
-                                Pengaturan Website
-                            </span>
-                        </a>
+                                Pengaturan Umum & Branding
+                            </a>
+                            <a class="dropdown-item {{ request()->routeIs('admin.settings.about.index') ? 'active' : '' }}"
+                                href="{{ route('admin.settings.about.index') }}">
+                                <svg xmlns="http://www.w3.org/2000/svg"
+                                    class="icon icon-tabler icon-tabler-info-circle me-2" width="24"
+                                    height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                    fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                    <path d="M3 12a9 9 0 1 0 18 0a9 9 0 0 0 -18 0" />
+                                    <path d="M12 9h.01" />
+                                    <path d="M11 12h1v4h1" />
+                                </svg>
+                                Konten "Tentang Kami"
+                            </a>
+                        </div>
                     </li>
-                    {{-- <li class="nav-item">
-              <a class="nav-link" href="#">
-                <span class="nav-link-icon d-md-none d-lg-inline-block">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-users-group" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M10 13a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M8 21v-1a2 2 0 0 1 2 -2h4a2 2 0 0 1 2 2v1" /><path d="M15 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M17 10h2a2 2 0 0 1 2 2v1" /><path d="M5 5a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M3 13v-1a2 2 0 0 1 2 -2h2" /></svg>
-                </span>
-                <span class="nav-link-title">
-                  Manajemen Admin
-                </span>
-              </a>
-            </li> --}}
+
                 </ul>
             </div>
         </div>

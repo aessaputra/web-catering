@@ -1,23 +1,25 @@
+{{-- resources/views/admin/settings/general_index.blade.php --}}
 @extends('admin.layouts.app')
 
-@section('title', 'Pengaturan Website')
+@section('title', 'Pengaturan Umum & Branding')
 
 @section('page-header')
-    <div class="page-pretitle">Konfigurasi</div>
-    <h2 class="page-title">Pengaturan Dasar Website</h2>
+    <div class="page-pretitle">Konfigurasi Situs</div>
+    <h2 class="page-title">Pengaturan Umum & Branding</h2>
 @endsection
 
 @section('content')
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Form Pengaturan</h3>
+            <h3 class="card-title">Form Pengaturan Umum</h3>
         </div>
         <div class="card-body">
-            {{-- PENTING: Tambahkan enctype="multipart/form-data" untuk upload file --}}
-            <form action="{{ route('admin.settings.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('admin.settings.general.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
-                {{-- Field-field setting teks (Nama, Email, Deskripsi, dll.) --}}
+                <h3 class="mb-3 border-bottom pb-2">Pengaturan Umum</h3>
+                {{-- Field: site_name, contact_email, site_description, contact_whatsapp, address --}}
+                {{-- Salin dari index.blade.php lama Anda, pastikan nama input adalah settings[key_name] --}}
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -76,25 +78,41 @@
                     </div>
                 </div>
 
-                <hr class="my-4"> {{-- Pemisah --}}
+                <div class="mb-3">
+                    <label class="form-label" for="settings_operating_hours">Jam Operasional</label>
+                    <textarea class="form-control @error('settings.operating_hours') is-invalid @enderror" name="settings[operating_hours]"
+                        id="settings_operating_hours" rows="3"
+                        placeholder="Senin - Minggu: 08:00 - 23:00&#10;Sabtu: 09:00 - 15:00&#10;Minggu: Tutup">{{ old('settings.operating_hours', $settings['operating_hours'] ?? '') }}</textarea>
+                    <small class="form-hint">Anda bisa menggunakan baris baru untuk memformat tampilan jam
+                        operasional.</small>
+                    @error('settings.operating_hours')
+                        <div class="invalid-feedback">{{ $message }}</div>
+                    @enderror
+                </div>
 
+                <h3 class="mt-4 mb-3 border-bottom pb-2">Branding & Tampilan</h3>
+                {{-- Field: site_logo_file, hero_image_homepage_file --}}
+                {{-- Salin dari index.blade.php lama Anda --}}
                 <h4 class="mb-3">Logo Website</h4>
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center mb-3 md:mb-0">
                         <label class="form-label d-block mb-2">Logo Saat Ini:</label>
-                        @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
-                            <img id="logoPreviewDisplay" src="{{ asset('storage/' . $settings['site_logo']) }}"
-                                alt="Logo Saat Ini" class="avatar avatar-xl border bg-white object-contain">
-                        @else
-                            <img id="logoPreviewDisplay" src="https://via.placeholder.com/100x100.png?text=No+Logo"
-                                alt="Tidak Ada Logo" class="avatar avatar-xl border">
-                        @endif
+                        <div>
+                            @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
+                                <img id="logoPreviewDisplay" src="{{ asset('storage/' . $settings['site_logo']) }}"
+                                    alt="Logo Saat Ini" class="avatar avatar-xl border bg-white object-contain">
+                            @else
+                                <img id="logoPreviewDisplay" src="https://via.placeholder.com/100x100.png?text=No+Logo"
+                                    alt="Tidak Ada Logo" class="avatar avatar-xl border">
+                            @endif
+                        </div>
                     </div>
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label" for="site_logo_file">Ganti/Upload Logo Baru</label>
                             <input type="file" class="form-control @error('site_logo_file') is-invalid @enderror"
                                 name="site_logo_file" id="site_logo_file" onchange="previewLogoForAdmin(event)">
+                            {{-- Pastikan fungsi previewLogoForAdmin ada --}}
                             <small class="form-hint">Format: JPG, PNG, GIF, SVG, WEBP. Maks 2MB.</small>
                             @error('site_logo_file')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -102,7 +120,7 @@
                         </div>
                     </div>
                     @if (!empty($settings['site_logo']) && Storage::disk('public')->exists($settings['site_logo']))
-                        <div class="col-md-3 align-self-end"> {{-- align-self-end agar sejajar dengan input file --}}
+                        <div class="col-md-3 align-self-end">
                             <div class="mb-3">
                                 <label class="form-check">
                                     <input class="form-check-input" type="checkbox" name="remove_current_logo"
@@ -113,9 +131,7 @@
                         </div>
                     @endif
                 </div>
-                <hr class="my-4">
-
-                {{-- BAGIAN BARU UNTUK HERO IMAGE HOMEPAGE --}}
+                <hr class="my-3">
                 <h4 class="mb-3">Gambar Hero Halaman Beranda</h4>
                 <div class="row align-items-center">
                     <div class="col-md-3 text-center mb-3 md:mb-0">
@@ -125,11 +141,11 @@
                                 <img id="heroImagePreviewDisplay"
                                     src="{{ asset('storage/' . $settings['hero_image_homepage']) }}"
                                     alt="Gambar Hero Saat Ini" class="img-fluid rounded border bg-white"
-                                    style="max-height: 150px; object-fit: contain;">
+                                    style="max-height: 100px; object-fit: contain;">
                             @else
                                 <img id="heroImagePreviewDisplay"
-                                    src="https://via.placeholder.com/300x150.png?text=No+Hero+Image"
-                                    alt="Tidak Ada Gambar Hero" class="img-fluid rounded border">
+                                    src="https://via.placeholder.com/200x100.png?text=No+Hero" alt="Tidak Ada Gambar Hero"
+                                    class="img-fluid rounded border">
                             @endif
                         </div>
                     </div>
@@ -139,10 +155,9 @@
                             <input type="file"
                                 class="form-control @error('hero_image_homepage_file') is-invalid @enderror"
                                 name="hero_image_homepage_file" id="hero_image_homepage_file"
-                                onchange="previewGenericImage(event, 'heroImagePreviewDisplay', https://via.placeholder.com/300x150.png?text=No+Hero+Image')">
-                            <small class="form-hint">Format:
-                                JPG, PNG, WEBP. Maks 3MB. Rekomendasi rasio 16:9 atau sesuai
-                                desain Anda.</small>
+                                onchange="previewGenericImage(event, 'heroImagePreviewDisplay', 'https://via.placeholder.com/200x100.png?text=No+Hero+Image')">
+                            {{-- Pastikan fungsi previewGenericImage ada --}}
+                            <small class="form-hint">Format: JPG, PNG, WEBP. Maks 3MB.</small>
                             @error('hero_image_homepage_file')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -154,130 +169,15 @@
                                 <label class="form-check">
                                     <input class="form-check-input" type="checkbox" name="remove_current_hero_image"
                                         value="1">
-                                    <span class="form-check-label">Hapus gambar hero saat ini</span>
+                                    <span class="form-check-label">Hapus gambar hero</span>
                                 </label>
                             </div>
                         </div>
                     @endif
                 </div>
-                <hr class="my-4">
 
-                {{-- Konten Halaman Tentang Kami --}}
-                <h3 class="mt-4 mb-3 border-bottom pb-2" id="about-content-settings">Konten Halaman "Tentang Kami"</h3>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_hero_title">Judul Hero "Tentang Kami"</label>
-                    <input type="text" class="form-control @error('settings.about_hero_title') is-invalid @enderror"
-                        name="settings[about_hero_title]" id="settings_about_hero_title"
-                        value="{{ old('settings.about_hero_title', $settings['about_hero_title'] ?? '') }}">
-                    @error('settings.about_hero_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_hero_subtitle_template">Subtitle Hero "Tentang
-                        Kami"</label>
-                    <input type="text"
-                        class="form-control @error('settings.about_hero_subtitle_template') is-invalid @enderror"
-                        name="settings[about_hero_subtitle_template]" id="settings_about_hero_subtitle_template"
-                        value="{{ old('settings.about_hero_subtitle_template', $settings['about_hero_subtitle_template'] ?? '') }}"
-                        placeholder="Gunakan {appName} untuk nama situs">
-                    <small class="form-hint">Contoh: Mengenal lebih dekat {appName}. Placeholder `{appName}` akan diganti
-                        nama situs.</small>
-                    @error('settings.about_hero_subtitle_template')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
 
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_history_title">Judul Sejarah</label>
-                    <input type="text" class="form-control @error('settings.about_history_title') is-invalid @enderror"
-                        name="settings[about_history_title]" id="settings_about_history_title"
-                        value="{{ old('settings.about_history_title', $settings['about_history_title'] ?? '') }}">
-                    @error('settings.about_history_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_history_content">Konten Sejarah</label>
-                    <textarea class="form-control @error('settings.about_history_content') is-invalid @enderror"
-                        name="settings[about_history_content]" id="settings_about_history_content" rows="5"
-                        placeholder="Gunakan {appName} untuk nama situs. Anda bisa menggunakan Markdown sederhana.">{{ old('settings.about_history_content', $settings['about_history_content'] ?? '') }}</textarea>
-                    @error('settings.about_history_content')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_vision_title">Judul Visi</label>
-                    <input type="text" class="form-control @error('settings.about_vision_title') is-invalid @enderror"
-                        name="settings[about_vision_title]" id="settings_about_vision_title"
-                        value="{{ old('settings.about_vision_title', $settings['about_vision_title'] ?? '') }}">
-                    @error('settings.about_vision_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_vision_content">Konten Visi</label>
-                    <textarea class="form-control @error('settings.about_vision_content') is-invalid @enderror"
-                        name="settings[about_vision_content]" id="settings_about_vision_content" rows="3">{{ old('settings.about_vision_content', $settings['about_vision_content'] ?? '') }}</textarea>
-                    @error('settings.about_vision_content')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_mission_title">Judul Misi</label>
-                    <input type="text"
-                        class="form-control @error('settings.about_mission_title') is-invalid @enderror"
-                        name="settings[about_mission_title]" id="settings_about_mission_title"
-                        value="{{ old('settings.about_mission_title', $settings['about_mission_title'] ?? '') }}">
-                    @error('settings.about_mission_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                @for ($i = 1; $i <= 4; $i++)
-                    <div class="mb-3">
-                        <label class="form-label" for="settings_about_mission_point_{{ $i }}">Poin Misi
-                            {{ $i }}</label>
-                        <input type="text"
-                            class="form-control @error('settings.about_mission_point_' . $i) is-invalid @enderror"
-                            name="settings[about_mission_point_{{ $i }}]"
-                            id="settings_about_mission_point_{{ $i }}"
-                            value="{{ old('settings.about_mission_point_' . $i, $settings['about_mission_point_' . $i] ?? '') }}">
-                        @error('settings.about_mission_point_' . $i)
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
-                    </div>
-                @endfor
-
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_team_title">Judul Tim</label>
-                    <input type="text" class="form-control @error('settings.about_team_title') is-invalid @enderror"
-                        name="settings[about_team_title]" id="settings_about_team_title"
-                        value="{{ old('settings.about_team_title', $settings['about_team_title'] ?? '') }}">
-                    @error('settings.about_team_title')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_team_content_1">Konten Tim (Paragraf 1)</label>
-                    <textarea class="form-control @error('settings.about_team_content_1') is-invalid @enderror"
-                        name="settings[about_team_content_1]" id="settings_about_team_content_1" rows="3">{{ old('settings.about_team_content_1', $settings['about_team_content_1'] ?? '') }}</textarea>
-                    @error('settings.about_team_content_1')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="settings_about_team_content_2">Konten Tim (Paragraf 2)</label>
-                    <textarea class="form-control @error('settings.about_team_content_2') is-invalid @enderror"
-                        name="settings[about_team_content_2]" id="settings_about_team_content_2" rows="3">{{ old('settings.about_team_content_2', $settings['about_team_content_2'] ?? '') }}</textarea>
-                    @error('settings.about_team_content_2')
-                        <div class="invalid-feedback">{{ $message }}</div>
-                    @enderror
-                </div>
-
-                {{-- Media Sosial & Lainnya --}}
-                <h4 class="mt-4 mb-3 border-bottom pb-2">Media Sosial & Lainnya</h4>
+                <h3 class="mt-4 mb-3 border-bottom pb-2">Media Sosial & Peta</h3>
                 <div class="row">
                     <div class="col-md-6">
                         <div class="mb-3">
@@ -314,17 +214,7 @@
                 </div>
 
                 <div class="card-footer text-end border-top pt-3 mt-3">
-                    <button type="submit" class="btn btn-primary">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-device-floppy"
-                            width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                            fill="none" stroke-linecap="round" stroke-linejoin="round">
-                            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                            <path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" />
-                            <path d="M12 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" />
-                            <path d="M14 4l0 4l-6 0l0 -4" />
-                        </svg>
-                        Simpan Pengaturan
-                    </button>
+                    <button type="submit" class="btn btn-primary">Simpan Pengaturan Umum</button>
                 </div>
             </form>
         </div>
@@ -365,3 +255,32 @@
         }
     </script>
 @endpush
+<script>
+    function previewLogoForAdmin(event) {
+        const input = event.target;
+        const preview = document.getElementById('logoPreviewDisplay');
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = 'https://via.placeholder.com/100x100.png?text=No+Logo';
+        }
+    }
+
+    function previewGenericImage(event, previewElementId, placeholderUrl) {
+        const input = event.target;
+        const preview = document.getElementById(previewElementId);
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                preview.src = e.target.result;
+            };
+            reader.readAsDataURL(input.files[0]);
+        } else {
+            preview.src = placeholderUrl;
+        }
+    }
+</script>

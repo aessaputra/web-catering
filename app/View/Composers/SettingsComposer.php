@@ -22,9 +22,24 @@ class SettingsComposer
     'instagram_url',
     'facebook_url',
     'Maps_url',
-    'homepage_promotion_message',
     'site_logo',
     'hero_image_homepage',
+    'operating_hours',
+
+    'about_hero_title',
+    'about_hero_subtitle_template',
+    'about_history_title',
+    'about_history_content',
+    'about_vision_title',
+    'about_vision_content',
+    'about_mission_title',
+    'about_mission_point_1',
+    'about_mission_point_2',
+    'about_mission_point_3',
+    'about_mission_point_4',
+    'about_team_title',
+    'about_team_content_1',
+    'about_team_content_2',
   ];
 
   /**
@@ -79,7 +94,21 @@ class SettingsComposer
       'instagram_url' => '#',
       'facebook_url' => '#',
       'Maps_url' => '',
-      'homepage_promotion_message' => 'Selamat datang di layanan kami!',
+      'operating_hours' => "Senin - Minggu: 08:00 - 23:00 WIB",
+      'about_hero_title' => 'Tentang Perusahaan Kami',
+      'about_hero_subtitle_template' => 'Mengenal Lebih Dekat {appName}',
+      'about_history_title' => 'Perjalanan Kami',
+      'about_history_content' => "Tuliskan sejarah perusahaan Anda di sini. Anda bisa menggunakan placeholder {appName} yang akan diganti dengan nama situs Anda.",
+      'about_vision_title' => 'Visi Kami',
+      'about_vision_content' => 'Tuliskan visi perusahaan Anda di sini.',
+      'about_mission_title' => 'Misi Kami',
+      'about_mission_point_1' => 'Poin misi pertama.',
+      'about_mission_point_2' => 'Poin misi kedua.',
+      'about_mission_point_3' => 'Poin misi ketiga.',
+      'about_mission_point_4' => 'Poin misi keempat.',
+      'about_team_title' => 'Tim Profesional Kami',
+      'about_team_content_1' => 'Deskripsikan tim Anda, paragraf pertama.',
+      'about_team_content_2' => 'Deskripsikan tim Anda, paragraf kedua.',
     ];
     return $defaults[$key] ?? null;
   }

@@ -21,9 +21,9 @@ class UpdateSettingsRequest extends FormRequest
             'settings.address' => 'nullable|string|max:500',
             'settings.instagram_url' => 'nullable|url:http,https|max:255',
             'settings.facebook_url' => 'nullable|url:http,https|max:255',
-            'settings.Maps_url' => 'nullable|url:http,https|max:2048', // Validasi sebagai URL
-            'settings.homepage_promotion_message' => 'nullable|string|max:500',
-            'site_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048', // Input file
+            'settings.Maps_url' => 'nullable|url:http,https|max:2048',
+            'settings.operating_hours' => 'nullable|string|max:500',
+            'site_logo_file' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
             'remove_current_logo' => 'nullable|boolean',
             'hero_image_homepage_file' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:3072',
             'remove_current_hero_image' => 'nullable|boolean',

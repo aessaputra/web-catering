@@ -10,7 +10,8 @@
                         <img src="{{ asset('storage/' . $siteSettings['site_logo']) }}"
                             alt="Logo {{ $siteSettings['site_name'] ?? '' }}" class="h-8 w-auto mr-2 sm:h-10">
                     @else
-                        <span class="mr-2 text-2xl sm:text-3xl">🍰</span>
+                        <span class="mr-2 text-2xl sm:text-3xl"><i
+                                class="fas fa-birthday-cake fa-fw text-2xl sm:text-3xl mr-2 text-orange-500"></i></span>
                     @endif
                     <span>
                         {{ $siteSettings['site_name'] ?? 'Catering Lezat' }}
@@ -33,11 +34,12 @@
 
                 {{-- Tombol Pesan Sekarang (Desktop) --}}
                 <a href="{{ route('order.create') }}"
-                    class="inline-flex items-center justify-center min-w-[14px] {{-- Sesuaikan nilai min-w ini --}}
+                    class="inline-flex items-center justify-center min-w-[14px]
                           px-3 py-2 rounded-md text-sm font-medium text-white 
                           bg-orange-500 hover:bg-orange-600 
                           focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 
-                          whitespace-nowrap">🛒
+                          whitespace-nowrap"><i
+                        class="fas fa-shopping-cart fa-fw mr-1"></i>
                     Pesan Sekarang
                 </a>
 

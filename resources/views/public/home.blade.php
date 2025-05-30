@@ -9,7 +9,6 @@
         if ($heroImagePath && Storage::disk('public')->exists($heroImagePath)) {
             $heroImageUrl = asset('storage/' . $heroImagePath);
         }
-        // Fallback background jika tidak ada gambar hero
         $heroFallbackClasses = 'bg-gradient-to-br from-orange-500 via-red-500 to-rose-600';
     @endphp
 
@@ -28,12 +27,14 @@
             </p>
             <div class="space-y-4 sm:space-y-0 sm:flex sm:flex-wrap sm:justify-center sm:gap-4">
                 <a href="{{ route('menu.index') }}"
-                    class="inline-block w-full sm:w-auto bg-orange-500 text-white font-bold py-3.5 px-8 rounded-lg hover:bg-orange-600 active:bg-orange-700 focus:bg-orange-700 transition-all duration-300 text-base md:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-orange-300">
-                    Lihat Pilihan Menu 🍽️
+                    class="inline-flex items-center justify-center w-full sm:w-auto bg-orange-500 text-white font-bold py-3.5 px-8 rounded-lg hover:bg-orange-600 active:bg-orange-700 focus:bg-orange-700 transition-all duration-300 text-base md:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-orange-300">
+                    <i class="fas fa-utensils fa-fw mr-2"></i>
+                    Lihat Pilihan Menu
                 </a>
                 <a href="{{ route('order.create') }}"
-                    class="inline-block w-full sm:w-auto bg-white text-orange-600 font-bold py-3.5 px-8 rounded-lg hover:bg-orange-50 active:bg-orange-100 focus:bg-orange-100 transition-all duration-300 text-base md:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-orange-300">
-                    Pesan Sekarang 🛒
+                    class="inline-flex items-center justify-center w-full sm:w-auto bg-white text-orange-600 font-bold py-3.5 px-8 rounded-lg hover:bg-orange-50 active:bg-orange-100 focus:bg-orange-100 transition-all duration-300 text-base md:text-lg shadow-xl hover:shadow-2xl transform hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-orange-300">
+                    <i class="fas fa-shopping-cart fa-fw mr-2"></i>
+                    Pesan Sekarang
                 </a>
             </div>
         </div>
@@ -109,23 +110,6 @@
         </div>
     </section>
 
-    <section class="py-16 md:py-24 bg-white">
-        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-orange-500 rounded-2xl shadow-xl p-8 md:p-12 lg:p-16 text-white">
-                <div class="text-center">
-                    <h2 class="text-3xl md:text-4xl font-bold mb-4">🎉 Promosi Spesial Kami! 🎉</h2>
-                    <p class="text-xl md:text-2xl mb-8 max-w-2xl mx-auto font-light">
-                        {{ $promotionMessage ?? ($siteSettings['homepage_promotion_message'] ?? 'Dapatkan penawaran menarik untuk setiap pesanan catering Anda. Kualitas terbaik, harga bersahabat!') }}
-                    </p>
-                    <a href="{{ route('menu.index') }}#promotions"
-                        class="inline-block bg-white text-orange-600 font-bold py-3 px-10 rounded-lg hover:bg-orange-100 active:bg-orange-200 focus:bg-orange-100 transition duration-300 text-lg shadow-lg hover:shadow-xl transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-orange-300">
-                        Lihat Detail Promo
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
-
     {{-- Section Tambahan: "Mengapa Memilih Kami?" --}}
     <section class="py-16 md:py-24 bg-gray-100">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -136,47 +120,38 @@
                 <div class="mt-4 h-1.5 w-24 bg-orange-500 mx-auto rounded-full"></div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-10 text-center">
+                {{-- Poin 1: Bahan Segar Pilihan --}}
                 <div
                     class="bg-white p-8 rounded-xl shadow-lg transform transition duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="flex items-center justify-center mb-5">
-                        <div class="bg-orange-100 text-orange-600 rounded-full p-4 shadow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z" />
-                            </svg>
+                        <div class="bg-orange-100 text-orange-600 rounded-full p-4 shadow text-3xl">
+                            <i class="fas fa-leaf fa-fw"></i>
                         </div>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Bahan Segar Pilihan</h3>
                     <p class="text-gray-600 text-sm leading-relaxed">Kami hanya menggunakan bahan-bahan segar berkualitas
                         tinggi untuk setiap hidangan.</p>
                 </div>
+
+                {{-- Poin 2: Halal & Higienis --}}
                 <div
                     class="bg-white p-8 rounded-xl shadow-lg transform transition duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="flex items-center justify-center mb-5">
-                        <div class="bg-green-100 text-green-600 rounded-full p-4 shadow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                            </svg>
+                        <div class="bg-green-100 text-green-600 rounded-full p-4 shadow text-3xl">
+                            <i class="fas fa-check-circle fa-fw"></i>
                         </div>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Halal & Higienis</h3>
                     <p class="text-gray-600 text-sm leading-relaxed">Semua menu kami diolah dengan standar kebersihan
                         tertinggi dan dijamin kehalalannya.</p>
                 </div>
+
+                {{-- Poin 3: Pelayanan Terbaik --}}
                 <div
                     class="bg-white p-8 rounded-xl shadow-lg transform transition duration-300 hover:shadow-xl hover:-translate-y-1">
                     <div class="flex items-center justify-center mb-5">
-                        <div class="bg-blue-100 text-blue-600 rounded-full p-4 shadow">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24"
-                                stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round"
-                                    d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.08-.94-1-1.5M7 15H4c0-1.5.42-2 .943-2.5M12 12a3 3 0 100-6 3 3 0 000 6zM7 15h3c1.183 0 2.179-.018 3.056-.06M17 15h-2.58M17 15a9 9 0 00-14 0" />
-                            </svg>
+                        <div class="bg-blue-100 text-blue-600 rounded-full p-4 shadow text-3xl">
+                            <i class="fas fa-concierge-bell fa-fw"></i>
                         </div>
                     </div>
                     <h3 class="text-xl font-semibold text-gray-800 mb-2">Pelayanan Terbaik</h3>

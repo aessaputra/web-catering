@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\MenuItemController;
 use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController;
 use App\Http\Controllers\Admin\SettingController;
+use App\Http\Controllers\Admin\ContactMessageController;
 
 // Rute Admin akan di-prefix dengan '/admin' dan diberi nama 'admin.'
 // serta dilindungi oleh middleware 'auth' dan 'admin' dari bootstrap/app.php
@@ -17,15 +18,17 @@ Route::resource('categories', MenuCategoryController::class)->except(['show'])->
 Route::resource('menu-items', MenuItemController::class)->except(['show'])->names('menu-items');
 Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update'])->names('orders');
 Route::resource('customers', CustomerController::class)->only(['index', 'show'])->names('customers');
-Route::get('settings', [SettingController::class, 'index'])->name('settings.index');
-Route::post('settings', [SettingController::class, 'store'])->name('settings.store');
+
+
+// Pengaturan Umum & Branding
+Route::get('settings/general', [SettingController::class, 'generalSettingsIndex'])->name('settings.general.index');
+Route::post('settings/general', [SettingController::class, 'storeGeneralSettings'])->name('settings.general.store');
+
+// Pengaturan Konten Halaman "Tentang Kami"
+Route::get('settings/about-page', [SettingController::class, 'aboutPageSettingsIndex'])->name('settings.about.index');
+Route::post('settings/about-page', [SettingController::class, 'storeAboutPageSettings'])->name('settings.about.store');
 
 // Rute untuk Pesan Kontak
-Route::get('contact-messages', [SettingController::class, 'contactMessagesIndex'])->name('contact-messages.index');
-Route::get('contact-messages/{message}', [SettingController::class, 'showContactMessage'])->name('contact-messages.show')->whereNumber('message');
-Route::delete('contact-messages/{message}', [SettingController::class, 'destroyContactMessage'])->name('contact-messages.destroy')->whereNumber('message');
-
-// Contoh Rute Login Admin Khusus (jika diperlukan nanti)
-// Route::get('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'showLoginForm'])->name('login');
-// Route::post('login', [App\Http\Controllers\Admin\Auth\LoginController::class, 'login']);
-// Route::post('logout', [App\Http\Controllers\Admin\Auth\LoginController::class, 'logout'])->name('logout');
+Route::resource('contact-messages', ContactMessageController::class)
+  ->only(['index', 'show', 'destroy'])
+  ->parameters(['contact-messages' => 'contactMessage']);

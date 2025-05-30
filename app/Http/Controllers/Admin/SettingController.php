@@ -5,80 +5,125 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Http\Requests\Admin\UpdateSettingsRequest;
-use App\Models\ContactMessage;
+use App\Http\Requests\Admin\UpdateAboutPageSettingsRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class SettingController extends Controller
 {
-    // Definisikan key settings yang akan dikelola
-    private $settingKeys = [
+    private array $generalSettingKeys = [
         'site_name',
         'site_description',
-        'contact_email',
         'contact_whatsapp',
         'address',
         'instagram_url',
         'facebook_url',
         'Maps_url',
-        'homepage_promotion_message',
         'site_logo',
-        'hero_image_homepage'
+        'hero_image_homepage',
+        'operating_hours'
     ];
 
-    public function index()
+    private array $aboutPageSettingKeys = [
+        'about_hero_title',
+        'about_hero_subtitle_template',
+        'about_history_title',
+        'about_history_content',
+        'about_vision_title',
+        'about_vision_content',
+        'about_mission_title',
+        'about_mission_point_1',
+        'about_mission_point_2',
+        'about_mission_point_3',
+        'about_mission_point_4',
+        'about_team_title',
+        'about_team_content_1',
+        'about_team_content_2',
+    ];
+
+    private function getDefaultSettingValue(string $key): ?string
     {
-        $settingsFromDB = Setting::whereIn('key', $this->settingKeys)
-            ->pluck('value', 'key');
-        $settings = [];
-        foreach ($this->settingKeys as $key) {
-            $settings[$key] = $settingsFromDB->get($key, '');
-        }
-        return view('admin.settings.index', compact('settings'));
+        $defaults = [
+            'site_name' => config('app.name', 'Catering Lezat'),
+            'site_logo' => null,
+            'hero_image_homepage' => null,
+            'operating_hours' => "Senin - Sabtu: 08:00 - 23:00 WIB",
+            'site_description' => 'Deskripsi default.',
+            'contact_email' => 'info@default.com',
+            'contact_whatsapp' => '08000000000',
+            'address' => 'Alamat default.',
+            'instagram_url' => '#',
+            'facebook_url' => '#',
+            'Maps_url' => '',
+
+            'about_hero_title' => 'Tentang Kami',
+            'about_hero_subtitle_template' => 'Mengenal Lebih Dekat {appName}',
+            'about_history_title' => 'Perjalanan Kami',
+            'about_history_content' => "Isi sejarah perusahaan di sini...",
+            'about_vision_title' => 'Visi Kami',
+            'about_vision_content' => 'Isi visi perusahaan di sini...',
+            'about_mission_title' => 'Misi Kami',
+            'about_mission_point_1' => 'Poin misi 1...',
+            'about_mission_point_2' => 'Poin misi 2...',
+            'about_mission_point_3' => 'Poin misi 3...',
+            'about_mission_point_4' => 'Poin misi 4...',
+            'about_team_title' => 'Tim Kami',
+            'about_team_content_1' => 'Deskripsi tim paragraf 1...',
+            'about_team_content_2' => 'Deskripsi tim paragraf 2...',
+        ];
+        return $defaults[$key] ?? '';
     }
 
-    public function store(UpdateSettingsRequest $request)
+    private function getSettingsForKeys(array $keys): array
+    {
+        $settingsFromDB = Setting::whereIn('key', $keys)->pluck('value', 'key');
+        $settings = [];
+        foreach ($keys as $key) {
+            $settings[$key] = $settingsFromDB->get($key, $this->getDefaultSettingValue($key));
+        }
+        return $settings;
+    }
+
+    /**
+     * Display the general website settings form.
+     */
+    public function generalSettingsIndex()
+    {
+        $settings = $this->getSettingsForKeys($this->generalSettingKeys);
+        return view('admin.settings.general_index', compact('settings'));
+    }
+
+    /**
+     * Store the general website settings.
+     */
+    public function storeGeneralSettings(UpdateSettingsRequest $request)
     {
         $validatedInputs = $request->validated();
-        $textSettings = $validatedInputs['settings'] ?? []; // Ambil array 'settings' jika ada
+        $textSettings = $validatedInputs['settings'] ?? [];
 
-        DB::beginTransaction(); // Mulai transaksi (opsional, tapi baik untuk beberapa operasi)
+        DB::beginTransaction();
         try {
-            // Handle File Upload untuk Logo
             if ($request->hasFile('site_logo_file')) {
-                // Hapus logo lama jika ada
                 $oldLogoPath = Setting::where('key', 'site_logo')->first()?->value;
                 if ($oldLogoPath && Storage::disk('public')->exists($oldLogoPath)) {
                     Storage::disk('public')->delete($oldLogoPath);
                 }
-
-                // Simpan logo baru ke storage/app/public/logos
-                // Gunakan nama file unik untuk menghindari konflik
                 $file = $request->file('site_logo_file');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $path = $file->storeAs('logos', $fileName, 'public'); // Simpan di storage/app/public/logos
-
-                Setting::updateOrCreate(
-                    ['key' => 'site_logo'],
-                    ['value' => $path]
-                );
+                $fileName = 'site_logo_' . time() . '.' . $file->getClientOriginalExtension();
+                $path = $file->storeAs('settings', $fileName, 'public');
+                Setting::updateOrCreate(['key' => 'site_logo'], ['value' => $path]);
             } elseif ($request->boolean('remove_current_logo')) {
-                // Hapus logo jika checkbox remove_current_logo dicentang dan tidak ada file baru yang diupload
                 $oldLogoPath = Setting::where('key', 'site_logo')->first()?->value;
                 if ($oldLogoPath && Storage::disk('public')->exists($oldLogoPath)) {
                     Storage::disk('public')->delete($oldLogoPath);
                 }
-                Setting::updateOrCreate(
-                    ['key' => 'site_logo'],
-                    ['value' => ''] // Set path logo menjadi kosong
-                );
+                Setting::updateOrCreate(['key' => 'site_logo'], ['value' => '']);
             }
 
-            // Handle File Upload untuk Hero Image Homepage
             if ($request->hasFile('hero_image_homepage_file')) {
                 $oldHeroImagePath = Setting::where('key', 'hero_image_homepage')->first()?->value;
                 if ($oldHeroImagePath && Storage::disk('public')->exists($oldHeroImagePath)) {
@@ -96,82 +141,60 @@ class SettingController extends Controller
                 Setting::updateOrCreate(['key' => 'hero_image_homepage'], ['value' => '']);
             }
 
-            // Simpan settings teks lainnya
             if (!empty($textSettings)) {
                 foreach ($textSettings as $key => $value) {
-                    // Pastikan key ada di definedSettingKeys dan bukan 'site_logo' (karena sudah dihandle)
-                    if (in_array($key, $this->settingKeys) && $key !== 'site_logo') {
-                        Setting::updateOrCreate(
-                            ['key' => $key],
-                            ['value' => $value ?? '']
-                        );
+                    if (in_array($key, $this->generalSettingKeys) && !in_array($key, ['site_logo', 'hero_image_homepage'])) {
+                        Setting::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
                     }
                 }
             }
 
             DB::commit();
-
             Cache::forget('site_global_settings');
-
-            Alert::success('Berhasil!', 'Pengaturan berhasil diperbarui.');
+            Alert::success('Berhasil!', 'Pengaturan umum berhasil diperbarui.');
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Gagal menyimpan pengaturan: ' . $e->getMessage(), ['exception' => $e]);
-            Alert::error('Gagal!', 'Terjadi kesalahan saat menyimpan pengaturan. Silakan coba lagi.');
+            Log::error('Gagal menyimpan pengaturan umum: ' . $e->getMessage(), ['exception' => $e]);
+            Alert::error('Gagal!', 'Terjadi kesalahan saat menyimpan pengaturan umum.');
         }
 
-        return redirect()->route('admin.settings.index');
+        return redirect()->route('admin.settings.general.index');
     }
 
     /**
-     * Display a listing of the contact messages.
+     * Display the "About Us" page content settings form.
      */
-    public function contactMessagesIndex(Request $request)
+    public function aboutPageSettingsIndex()
     {
-        $query = ContactMessage::orderBy('created_at', 'desc');
+        $settings = $this->getSettingsForKeys($this->aboutPageSettingKeys);
+        return view('admin.settings.about_page_index', compact('settings'));
+    }
 
-        if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('name', 'like', $searchTerm)
-                    ->orWhere('email', 'like', $searchTerm)
-                    ->orWhere('message', 'like', $searchTerm);
-            });
-        }
+    /**
+     * Store the "About Us" page content settings.
+     */
+    public function storeAboutPageSettings(UpdateAboutPageSettingsRequest $request)
+    {
+        $validatedSettingsInput = $request->validated()['settings_about'];
 
-        if ($request->filled('status')) {
-            if ($request->status == 'read') {
-                $query->where('is_read', true);
-            } elseif ($request->status == 'unread') {
-                $query->where('is_read', false);
+        DB::beginTransaction();
+        try {
+            if (!empty($validatedSettingsInput)) {
+                foreach ($validatedSettingsInput as $key => $value) {
+                    if (in_array($key, $this->aboutPageSettingKeys)) {
+                        Setting::updateOrCreate(['key' => $key], ['value' => $value ?? '']);
+                    }
+                }
             }
+            DB::commit();
+            Cache::forget('site_global_settings');
+            Alert::success('Berhasil!', 'Konten halaman "Tentang Kami" berhasil diperbarui.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menyimpan pengaturan konten Tentang Kami: ' . $e->getMessage(), ['exception' => $e]);
+            Alert::error('Gagal!', 'Terjadi kesalahan saat menyimpan konten halaman "Tentang Kami".');
         }
 
-
-        $contactMessages = $query->paginate(15)->withQueryString();
-        return view('admin.settings.contact_messages_index', compact('contactMessages'));
-    }
-
-    /**
-     * Display the specified contact message.
-     */
-    public function showContactMessage(ContactMessage $message) // Route Model Binding
-    {
-        // Tandai sebagai sudah dibaca jika belum
-        if (!$message->is_read) {
-            $message->is_read = true;
-            $message->save();
-        }
-        return view('admin.settings.contact_messages_show', compact('message'));
-    }
-
-    /**
-     * Remove the specified contact message from storage.
-     */
-    public function destroyContactMessage(ContactMessage $message) // Route Model Binding
-    {
-        $message->delete();
-        Alert::success('Pesan Dihapus!', 'Pesan kontak telah berhasil dihapus.');
-        return redirect()->route('admin.contact-messages.index');
+        return redirect()->route('admin.settings.about.index');
     }
 }
