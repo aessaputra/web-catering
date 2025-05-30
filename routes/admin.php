@@ -16,7 +16,14 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 
 Route::resource('categories', MenuCategoryController::class)->except(['show'])->names('categories');
 Route::resource('menu-items', MenuItemController::class)->except(['show'])->names('menu-items');
-Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update'])->names('orders');
+
+Route::get('orders/archived', [AdminOrderController::class, 'archived'])->name('orders.archived');
+Route::post('orders/{order}/restore', [AdminOrderController::class, 'restore'])->name('orders.restore');
+Route::delete('orders/{order}/force-delete', [AdminOrderController::class, 'forceDelete'])->name('orders.force-delete');
+Route::resource('orders', AdminOrderController::class)
+  ->only(['index', 'show', 'update', 'destroy'])
+  ->names('orders');
+
 Route::get('customers/archived', [CustomerController::class, 'archived'])->name('customers.archived');
 Route::post('customers/{customer}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
 Route::delete('customers/{customer}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');

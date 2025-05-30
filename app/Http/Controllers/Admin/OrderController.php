@@ -6,84 +6,136 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
-    // Daftar status pesanan yang valid
-    private $orderStatuses = [
+    protected $orderStatuses = [
         'pending' => 'Pending',
         'processing' => 'Diproses',
         'shipped' => 'Dikirim',
-        'delivered' => 'Selesai', // Atau 'Selesai'
+        'delivered' => 'Selesai',
         'cancelled' => 'Dibatalkan',
     ];
 
-    /**
-     * Display a listing of the resource.
-     */
     public function index(Request $request)
     {
-        $query = Order::with('user') // Eager load relasi user jika ada
-            ->orderBy('created_at', 'desc');
+        $query = Order::with('user')->orderBy('created_at', 'desc');
 
-        // Filter berdasarkan status
-        if ($request->filled('status') && array_key_exists($request->status, $this->orderStatuses)) {
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($request->filled('status') && $request->status != 'all') {
             $query->where('status', $request->status);
         }
 
-        // Pencarian berdasarkan nama pelanggan atau email atau ID pesanan
-        if ($request->filled('search')) {
-            $searchTerm = '%' . $request->search . '%';
-            $query->where(function ($q) use ($searchTerm) {
-                $q->where('id', 'like', $searchTerm)
-                    ->orWhere('customer_name', 'like', $searchTerm)
-                    ->orWhere('customer_email', 'like', $searchTerm);
-            });
-        }
-
         $orders = $query->paginate(15)->withQueryString();
-        $statuses = $this->orderStatuses;
-
-        return view('admin.orders.index', compact('orders', 'statuses'));
+        return view('admin.orders.index', compact('orders'), ['orderStatuses' => $this->orderStatuses]);
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Order $order)
     {
-        // Eager load item pesanan beserta detail item menunya dan user (jika ada)
-        $order->load(['orderItems.menuItem', 'user']);
-        $statuses = $this->orderStatuses;
-        return view('admin.orders.show', compact('order', 'statuses'));
+        if ($order->trashed()) {
+            Alert::warning('Diarsipkan', 'Pesanan ini telah diarsipkan.');
+        }
+        $order->load('orderItems.menuItem', 'user');
+        return view('admin.orders.show', compact('order'), ['orderStatuses' => $this->orderStatuses]);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Request $request, Order $order)
     {
-        $request->validate([
-            'status' => ['required', 'string', \Illuminate\Validation\Rule::in(array_keys($this->orderStatuses))],
-        ]);
-
-        $order->status = $request->status;
-        $order->save();
-
-        // Kirim notifikasi ke pelanggan tentang perubahan status (opsional)
-        // if ($order->user) {
-        //     Mail::to($order->user->email)->send(new OrderStatusUpdated($order));
-        // } else {
-        //     Mail::to($order->customer_email)->send(new OrderStatusUpdated($order));
-        // }
-
-        Alert::success('Berhasil!', 'Status pesanan telah diperbarui.');
-
+        $request->validate(['status' => 'required|in:' . implode(',', array_keys($this->orderStatuses))]);
+        $order->update(['status' => $request->status]);
+        Alert::success('Status Diperbarui!', "Status Pesanan #{$order->id} berhasil diubah menjadi '{$this->orderStatuses[$request->status]}'.");
         return redirect()->route('admin.orders.show', $order);
     }
 
-    // Method create, store, edit, destroy tidak kita gunakan untuk Order dari sisi admin
-    // jadi bisa dihapus jika controllernya dibuat dengan --resource penuh.
-    // Karena kita hanya menggunakan 'index', 'show', 'update' di routes,
-    // maka method lain tidak akan terpanggil.
+    /**
+     * Soft delete the specified order.
+     */
+    public function destroy(Order $order)
+    {
+        try {
+            $orderId = $order->id;
+            $order->delete();
+            Alert::success('Berhasil Diarsipkan!', "Pesanan #{$orderId} telah berhasil diarsipkan.");
+        } catch (\Exception $e) {
+            Log::error('Gagal mengarsipkan pesanan: ' . $e->getMessage(), ['order_id' => $order->id, 'exception' => $e]);
+            Alert::error('Gagal!', 'Terjadi kesalahan saat mencoba mengarsipkan pesanan.');
+        }
+        return redirect()->route('admin.orders.index');
+    }
+
+    /**
+     * Display a listing of archived orders.
+     */
+    public function archived(Request $request)
+    {
+        $query = Order::onlyTrashed()->with('user')->orderBy('deleted_at', 'desc');
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('id', 'like', "%{$search}%")
+                    ->orWhere('customer_name', 'like', "%{$search}%")
+                    ->orWhere('customer_email', 'like', "%{$search}%")
+                    ->orWhereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%{$search}%");
+                    });
+            });
+        }
+        if ($request->filled('status') && $request->status != 'all') {
+            $query->where('status', $request->status);
+        }
+
+        $archivedOrders = $query->paginate(15)->withQueryString();
+        return view('admin.orders.archived', compact('archivedOrders'), ['orderStatuses' => $this->orderStatuses]);
+    }
+
+    /**
+     * Restore a soft-deleted order.
+     */
+    public function restore($orderId)
+    {
+        $order = Order::onlyTrashed()->findOrFail($orderId);
+        try {
+            $order->restore();
+            Alert::success('Berhasil Dipulihkan!', "Pesanan #{$order->id} telah berhasil dipulihkan.");
+        } catch (\Exception $e) {
+            Log::error('Gagal memulihkan pesanan: ' . $e->getMessage(), ['order_id' => $orderId, 'exception' => $e]);
+            Alert::error('Gagal!', 'Terjadi kesalahan saat mencoba memulihkan pesanan.');
+            return redirect()->route('admin.orders.archived');
+        }
+        return redirect()->route('admin.orders.archived');
+    }
+
+    /**
+     * Permanently delete a soft-deleted order.
+     */
+    public function forceDelete($orderId)
+    {
+        $order = Order::onlyTrashed()->findOrFail($orderId);
+        DB::beginTransaction();
+        try {
+            $orderIdBackup = $order->id;
+            $order->forceDelete();
+            DB::commit();
+            Alert::success('Berhasil Dihapus Permanen!', "Pesanan #{$orderIdBackup} dan item terkait telah dihapus secara permanen.");
+        } catch (\Exception $e) {
+            DB::rollBack();
+            Log::error('Gagal menghapus permanen pesanan: ' . $e->getMessage(), ['order_id' => $orderId, 'exception' => $e]);
+            Alert::error('Gagal!', 'Terjadi kesalahan saat mencoba menghapus pesanan secara permanen.');
+            return redirect()->route('admin.orders.archived');
+        }
+        return redirect()->route('admin.orders.archived');
+    }
 }
