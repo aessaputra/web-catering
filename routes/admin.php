@@ -17,7 +17,13 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 Route::resource('categories', MenuCategoryController::class)->except(['show'])->names('categories');
 Route::resource('menu-items', MenuItemController::class)->except(['show'])->names('menu-items');
 Route::resource('orders', AdminOrderController::class)->only(['index', 'show', 'update'])->names('orders');
-Route::resource('customers', CustomerController::class)->only(['index', 'show'])->names('customers');
+Route::get('customers/archived', [CustomerController::class, 'archived'])->name('customers.archived');
+Route::post('customers/{customer}/restore', [CustomerController::class, 'restore'])->name('customers.restore');
+Route::delete('customers/{customer}/force-delete', [CustomerController::class, 'forceDelete'])->name('customers.force-delete');
+Route::resource('customers', CustomerController::class)
+  ->only(['index', 'show', 'destroy'])
+  ->parameters(['customers' => 'customer'])
+  ->names('customers');
 
 
 // Pengaturan Umum & Branding
@@ -31,4 +37,5 @@ Route::post('settings/about-page', [SettingController::class, 'storeAboutPageSet
 // Rute untuk Pesan Kontak
 Route::resource('contact-messages', ContactMessageController::class)
   ->only(['index', 'show', 'destroy'])
-  ->parameters(['contact-messages' => 'contactMessage']);
+  ->parameters(['contact-messages' => 'contactMessage'])
+  ->names('contact-messages');

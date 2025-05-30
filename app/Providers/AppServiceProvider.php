@@ -6,6 +6,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use App\View\Composers\SettingsComposer;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\Paginator;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -58,8 +59,6 @@ class AppServiceProvider extends ServiceProvider
             SettingsComposer::class
         );
 
-        // Alternatif jika ingin data settings tersedia di SEMUA view:
-        // View::composer('*', SettingsComposer::class);
-        // Untuk saat ini, mendaftarkan ke view spesifik lebih terkontrol.
+        Paginator::useBootstrapFive();
     }
 }

@@ -65,7 +65,7 @@
             </table>
         </div>
         <div class="card-footer d-flex align-items-center">
-            {{ $customers->links('vendor.pagination.bootstrap-5') }}
+            {{ $categories->links() }}
         </div>
     </div>
 @endsection

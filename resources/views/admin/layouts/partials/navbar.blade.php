@@ -81,8 +81,10 @@
                     </li>
 
                     {{-- Manajemen Pelanggan --}}
-                    <li class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
-                        <a class="nav-link" href="{{ route('admin.customers.index') }}">
+                    <li class="nav-item dropdown {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}">
+                        <a class="nav-link dropdown-toggle" href="#navbar-customers" data-bs-toggle="dropdown"
+                            data-bs-auto-close="true" role="button"
+                            aria-expanded="{{ request()->routeIs('admin.customers.*') ? 'true' : 'false' }}">
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-users"
                                     width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
@@ -98,6 +100,16 @@
                                 Manajemen Pelanggan
                             </span>
                         </a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item {{ request()->routeIs('admin.customers.index') ? 'active' : '' }}"
+                                href="{{ route('admin.customers.index') }}">
+                                Daftar Pelanggan Aktif
+                            </a>
+                            <a class="dropdown-item {{ request()->routeIs('admin.customers.archived') ? 'active' : '' }}"
+                                href="{{ route('admin.customers.archived') }}">
+                                Arsip Pelanggan
+                            </a>
+                        </div>
                     </li>
 
                     {{-- Arsip Pesan Kontak --}}
@@ -106,7 +118,8 @@
                             <span class="nav-link-icon d-md-none d-lg-inline-block">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-mail-opened"
                                     width="24" height="24" viewBox="0 0 24 24" stroke-width="2"
-                                    stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                    stroke="currentColor" fill="none" stroke-linecap="round"
+                                    stroke-linejoin="round">
                                     <path stroke="none" d="M0 0h24v24H0z" fill="none" />
                                     <path d="M3 9l9 6l9 -6l-9 -6l-9 6" />
                                     <path d="M21 9v10a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-10" />
