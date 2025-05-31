@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Public;
 
-// use Illuminate\Foundation\Http\FormRequest;
 use Laragear\Turnstile\Http\Requests\TurnstileRequest;
 
 class ContactFormRequest extends TurnstileRequest

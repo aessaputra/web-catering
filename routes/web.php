@@ -8,6 +8,7 @@ use App\Http\Controllers\Public\AboutController;
 use App\Http\Controllers\Public\ContactController;
 use App\Http\Controllers\Public\OrderController as PublicOrderController;
 use App\Http\Controllers\Public\UserDashboardController;
+use App\Http\Controllers\Auth\TwoFactorChallengeController;
 
 // Rute Publik Kustom Kita
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -25,6 +26,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
+
+// Rute untuk Verifikasi Dua Langkah (2FA)
+Route::get('/2fa/verify', [TwoFactorChallengeController::class, 'showChallengeForm'])->name('2fa.verify.form');
+Route::post('/2fa/verify', [TwoFactorChallengeController::class, 'verifyChallenge'])->name('2fa.verify');
 
 // Rute yang memerlukan pengguna untuk login DAN SUDAH verifikasi email
 Route::middleware(['auth', 'verified'])->group(function () {
