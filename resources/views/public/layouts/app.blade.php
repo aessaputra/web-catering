@@ -29,6 +29,7 @@
 
     @include('sweetalert::alert')
     @stack('scripts')
+    <x-turnstile::script />
 </body>
 
 </html>

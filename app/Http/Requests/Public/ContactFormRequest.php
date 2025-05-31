@@ -2,16 +2,17 @@
 
 namespace App\Http\Requests\Public;
 
-use Illuminate\Foundation\Http\FormRequest;
+// use Illuminate\Foundation\Http\FormRequest;
+use Laragear\Turnstile\Http\Requests\TurnstileRequest;
 
-class ContactFormRequest extends FormRequest
+class ContactFormRequest extends TurnstileRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true; // Izinkan semua orang mengirim form kontak
+        return true;
     }
 
     /**

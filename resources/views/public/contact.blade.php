@@ -98,8 +98,6 @@
                         <i class="fas fa-paper-plane mr-2"></i> Kirim Pesan Langsung
                     </h3>
 
-                    {{-- SweetAlert akan menangani notifikasi dari controller --}}
-                    {{-- Jika Anda juga ingin notifikasi session standar: --}}
                     @if (session('success'))
                         <div x-data="{ show: true }" x-show="show" x-transition x-init="setTimeout(() => show = false, 5000)"
                             class="bg-green-50 border-l-4 border-green-400 text-green-700 p-4 mb-6 rounded-md"
@@ -211,6 +209,11 @@
                                 <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                             @enderror
                         </div>
+
+                        <x-turnstile::widget />
+                        @error('cf-turnstile-response')
+                            <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
+                        @enderror
 
                         <div>
                             <button type="submit"
