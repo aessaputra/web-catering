@@ -7,19 +7,24 @@ use Illuminate\Support\Facades\Route;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
-        web: __DIR__.'/../routes/web.php',
+        web: __DIR__ . '/../routes/web.php',
         // api: __DIR__.'/../routes/api.php',
-        commands: __DIR__.'/../routes/console.php',
-        channels: __DIR__.'/../routes/channels.php',
+        commands: __DIR__ . '/../routes/console.php',
+        channels: __DIR__ . '/../routes/channels.php',
         health: '/up',
         then: function () {
             Route::middleware(['web', 'auth', 'admin']) // Middleware 'admin' akan digunakan di sini
-                 ->prefix('admin')
-                 ->name('admin.')
-                 ->group(base_path('routes/admin.php'));
+                ->prefix('admin')
+                ->name('admin.')
+                ->group(base_path('routes/admin.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
+
+        $middleware->validateCsrfTokens(except: [
+            'notification/handling',
+        ]);
+
         // Daftarkan alias 'admin' di sini
         $middleware->alias([
             'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class, // Ini biasanya sudah ada dari Breeze

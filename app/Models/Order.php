@@ -20,6 +20,9 @@ class Order extends Model
         'total_amount',
         'status',
         'notes',
+        'payment_token',
+        'payment_status',
+        'midtrans_order_id',
     ];
 
     protected function casts(): array
