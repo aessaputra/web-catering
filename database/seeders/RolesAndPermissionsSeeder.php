@@ -77,21 +77,9 @@ class RolesAndPermissionsSeeder extends Seeder
 
         // --- TUGASKAN ROLE KE USER YANG SUDAH ADA ---
         // Contoh: User admin yang sudah Anda buat di UserSeeder
-        $adminUser = User::where('email', 'admin@kulinermamah.biz.id')->first();
+        $adminUser = User::where('email', 'aessaputra@yahoo.com')->first();
         if ($adminUser) {
             $adminUser->assignRole('admin');
-            // Jika Anda sudah tidak menggunakan kolom is_admin, Anda bisa mengomentari baris update is_admin di UserSeeder
         }
-
-        // Contoh: User pelanggan yang sudah Anda buat di UserSeeder
-        $customerUser = User::where('email', 'aes@pembeli.com')->first();
-        if ($customerUser) {
-            $customerUser->assignRole('pelanggan');
-        }
-
-        // Jika Anda memiliki banyak user pelanggan, Anda bisa loop dan assign role 'pelanggan'
-        // User::where('is_admin', false)->get()->each(function($user) {
-        //     $user->assignRole('pelanggan');
-        // });
     }
 }

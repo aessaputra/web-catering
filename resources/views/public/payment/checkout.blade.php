@@ -60,54 +60,37 @@
 
 @push('scripts')
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            var payButton = document.getElementById('pay-button');
-            if (payButton) {
-                payButton.addEventListener('click', function() {
-                    if (window.snap) {
-                        window.snap.pay('{{ $order->payment_token }}', {
-                            onSuccess: function(result) {
-                                LogRocket.log('Midtrans Payment Success (Client):', result);
-                                // Arahkan ke rute payment.finish, Midtrans akan tambah query params
-                                window.location.href =
-                                    '{{ route('payment.finish') }}?order_id=' + result
-                                    .order_id + '&status_code=' + result.status_code +
-                                    '&transaction_status=' + result.transaction_status;
-                            },
-                            onPending: function(result) {
-                                LogRocket.log('Midtrans Payment Pending (Client):', result);
-                                // Arahkan ke rute payment.unfinish (atau payment.finish)
-                                window.location.href =
-                                    '{{ route('payment.unfinish') }}?order_id=' + result
-                                    .order_id + '&status_code=' + result.status_code +
-                                    '&transaction_status=' + result.transaction_status;
-                            },
-                            onError: function(result) {
-                                LogRocket.log('Midtrans Payment Error (Client):', result);
-                                // Arahkan ke rute payment.error
-                                window.location.href =
-                                    '{{ route('payment.error') }}?order_id=' + result
-                                    .order_id + '&status_code=' + result.status_code +
-                                    '&transaction_status=' + result.transaction_status;
-                            },
-                            onClose: function() {
-                                LogRocket.log('Midtrans Popup Closed by User');
-                                // Arahkan ke rute payment.unfinish
-                                // Anda perlu memastikan 'order_id' Midtrans tersedia jika onClose dipicu tanpa result
-                                // Cara yang lebih baik adalah mungkin menyimpan order_id internal di JS variabel
-                                // atau cukup redirect ke halaman yang tidak butuh order_id jika result tidak ada.
-                                // Untuk saat ini, kita bisa coba:
-                                // window.location.href = '{{ route('payment.unfinish') }}'; // Tanpa order_id jika tidak ada result
-                                alert(
-                                    'Anda menutup jendela pembayaran sebelum transaksi selesai.');
-                            }
-                        });
-                    } else {
-                        console.error('Snap.js tidak termuat.');
-                        alert('Gagal memuat modul pembayaran. Silakan coba lagi atau hubungi kami.');
+  document.addEventListener('DOMContentLoaded', function () {
+    var payButton = document.getElementById('pay-button');
+    if (payButton) {
+        payButton.addEventListener('click', function () {
+            if (window.snap) {
+                window.snap.pay('{{ $order->payment_token }}', {
+                    onSuccess: function(result){
+                        console.log('Midtrans Payment Success (Client):', result);
+                        // Arahkan ke rute payment.finish, Midtrans akan tambah query params
+                        // Kita juga bisa tambahkan app_order_id untuk kemudahan di controller callback
+                        window.location.href = '{{ route("payment.finish") }}?order_id=' + result.order_id + '&status_code=' + result.status_code + '&transaction_status=' + result.transaction_status + '&app_order_id={{ $order->id }}';
+                    },
+                    onPending: function(result){
+                        console.log('Midtrans Payment Pending (Client):', result);
+                        window.location.href = '{{ route("payment.unfinish") }}?order_id=' + result.order_id + '&status_code=' + result.status_code + '&transaction_status=' + result.transaction_status + '&app_order_id={{ $order->id }}';
+                    },
+                    onError: function(result){
+                        console.log('Midtrans Payment Error (Client):', result);
+                        window.location.href = '{{ route("payment.error") }}?order_id=' + result.order_id + '&status_code=' + result.status_code + '&transaction_status=' + result.transaction_status + '&app_order_id={{ $order->id }}';
+                    },
+                    onClose: function(){
+                        console.log('Midtrans Popup Closed by User for App Order ID: {{ $order->id }}');
+                        // Arahkan ke unfinish, mungkin dengan app_order_id jika kita bisa pass
+                        window.location.href = '{{ route("payment.unfinish") }}?order_id={{ $order->midtrans_order_id ?? $order->id."-TMP" }}&status_code=202&transaction_status=cancelled_by_user&app_order_id={{ $order->id }}';
                     }
                 });
-            }
+            } else { /* ... error snap.js tidak termuat ... */ }
         });
-    </script>
+        // Pertimbangkan untuk auto-click tombol bayar jika UX-nya diinginkan
+        // setTimeout(() => { payButton.click(); }, 500);
+    }
+  });
+</script>
 @endpush
